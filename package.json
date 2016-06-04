@@ -1,0 +1,20 @@
+{
+  "name": "krzywinski",
+  "version": "1.0.0",
+  "description": "foo",
+  "main": "script.js",
+  "scripts": {
+    "scss": "sass --watch styles.scss:styles.css --style compressed",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhardih/krzywinski.git"
+  },
+  "author": "René Hansen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rhardih/krzywinski/issues"
+  },
+  "homepage": "https://github.com/rhardih/krzywinski#readme"
+}

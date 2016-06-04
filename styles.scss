@@ -1,0 +1,220 @@
+// Mixins
+
+@mixin cursor-pointer {
+  cursor: pointer;
+  cursor: hand;
+}
+
+@mixin noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@mixin flex-display {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+}
+
+@mixin flex($grow: 1, $shrink: 0, $basis: calc(100% / 3)) {
+  -webkit-box-flex: $grow $shrink $basis;
+  -moz-box-flex: $grow $shrink $basis;
+  width: $basis;
+  -webkit-flex: $grow $shrink $basis;
+  -ms-flex: $grow $shrink $basis;
+  flex: $grow $shrink $basis;
+}
+
+@mixin flex-align($v: center) {
+  -webkit-box-align: $v;
+  -webkit-align-items: $v;
+  -ms-flex-align: $v;
+  align-items: $v;
+}
+
+@mixin flex-justify($v: center) {
+  -webkit-box-pack: $v;
+  -webkit-justify-content: $v;
+  -ms-flex-pack: $v;
+  justify-content: $v;
+}
+
+@mixin flex-flow($direction: row, $wrap: wrap) {
+  -webkit-flex-flow: $direction $wrap;
+  -ms-flex-flow: $direction $wrap;
+  flex-flow: $direction $wrap;
+}
+
+// Colors
+
+$black: #000;
+$mine-shaft: #222;
+$willow-grove: #676;
+$aqua-forest: #6a6;
+
+// Imports
+
+@import 'input_range';
+
+// General tag styles
+
+html {
+  box-sizing: border-box;
+  // Fixes the window.innerWidth discrepancy with IE
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+
+  background: $black;;
+}
+
+body {
+  font-family: system, -apple-system, BlinkMacSystemFont,
+  "Helvetica Neue", "Lucida Grande";
+
+  &.loading {
+    &, & * {
+      cursor: progress !important;
+    }
+  }
+}
+
+a {
+  outline: 0;
+}
+
+p {
+  margin: 1em 0;
+  color: $willow-grove;
+}
+
+// Helper classes
+
+.flex {
+  @include flex-display;
+}
+
+.wrap {
+  margin: 0 auto;
+  width: 768px;
+}
+
+$colors: #DA416C #F15637 #E35736 #E8BA3B #F3C92D #A0AA39 #5DA33F #1D91DA #3C5481
+#91477B;
+
+@each $color in $colors {
+  $i: index($colors, $color) - 1;
+  .color-#{$i} { 
+    color: $color;
+  }
+}
+
+.number-colors {
+  font-size: 2rem;
+  text-align: center;
+}
+
+#dropdown {
+  color: $willow-grove;
+  text-align: center;
+}
+
+#dropdown-drawer {
+  max-height: 0;
+  transition: max-height 0.15s ease-out;
+  overflow: hidden;
+}
+
+#dropdown-controls {
+  @include flex-justify;
+  @include flex-align;
+  @include flex-flow;
+
+  a {
+    color: $willow-grove;
+    text-decoration: none;
+  }
+
+  & > * {
+    @include flex;
+
+    margin: 0;
+    padding: 0.3rem;
+  }
+
+  .subject {
+    @include cursor-pointer;
+
+    text-align: center;
+    font-size: 5rem;
+
+    text-decoration: none;
+    color: $willow-grove;
+
+    &.active {
+      color: $aqua-forest;
+    }
+  }
+
+  #digits-radio {
+    @include noselect;
+    @include flex-justify;
+    @include flex-align;
+
+    input {
+      display: none;
+    }
+
+    input:checked + label {
+      color: $aqua-forest;
+    }
+
+    label {
+      @include cursor-pointer;
+      padding: 0 0.5rem;
+    }
+  }
+}
+
+input[type=checkbox]:checked ~ #dropdown-drawer {
+  max-height: 500px;
+  transition: max-height 0.25s ease-in;
+}
+
+#dropdown-label {
+  display: block;
+  margin-top: 1rem;
+}
+
+#dropdown-check {
+  display: none;
+}
+
+#dropdown-label {
+  @include cursor-pointer;
+  @include noselect;
+
+  font-size: 3em;
+
+}
+
+#stage {
+  @include cursor-pointer;
+  @include noselect;
+
+  display: block;
+  margin: -1em auto;
+}
