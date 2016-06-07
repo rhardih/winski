@@ -60,6 +60,8 @@ var Numbers = function() {
       }, function() {});
 
       currentMax[this.subject] = n;
+    } else {
+      done();
     }
 
     this.digits = n;
