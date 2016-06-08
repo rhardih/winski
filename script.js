@@ -115,7 +115,7 @@ var widthRadiusToCols = function(width, radius) {
   return (width - gridSpacing) / (gridSpacing + 2 * radius);
 }
 
-var render = function(cols, lines, numbers) {
+var render = function(cols, displayMode, numbers) {
   var svg = d3.select("svg");
   var subject = numbers.subjectValue();
   var limit = subject.length;
@@ -126,18 +126,24 @@ var render = function(cols, lines, numbers) {
   var linesData = [];
   var thisDigit;
   var digitSW, digitW, digitNW, digitN;
+  var iSW, iW, iNW, iN;
   var nextDigit = 3;
   var thisX, nextX, thisY, nextY;
   var thisColor;
-  var lastRow;
+  var firstCol, lastCol, firstRow, lastRow;
   var datum;
-  var i;
+  var i, xIndex;
   var xCoord = function(i) {
     return padding + (i % cols) * (gridSpacing + 2 * radius);
   }
   var yCoord = function(i) {
     return padding + Math.floor(i / cols) * (gridSpacing + 2 * radius);
   }
+  var markEqualNeigbour = function(i) {
+    if (typeof circlesData[i] !== 'undefined') {
+      circlesData[i].hasEqualNeighbour = true;
+    }
+  };
 
   radius = widthColsToRadius(width, cols);
   strokeWidth = radius / 2.5;
@@ -154,7 +160,9 @@ var render = function(cols, lines, numbers) {
     thisY = yCoord(i);
     nextX = xCoord(i + 1);
     nextY = yCoord(i + 1);
-    firstCol = i % cols === 0;
+    xIndex = i % cols;
+    firstCol = xIndex === 0;
+    lastCol = xIndex === cols - 1;
     firstRow = i <= cols;
     lastRow = i >= (limit - cols - 1);
 
@@ -163,18 +171,20 @@ var render = function(cols, lines, numbers) {
       innerColor: colors[nextDigit],
       x: thisX,
       y: thisY,
-      r: radius
+      r: radius,
+      hasEqualNeighbour: false
     };
 
-    circlesData.push(datum)
-
-    if (lines) {
+    if (displayMode > 0) {
       if (!firstCol && !lastRow) {
-        digitSW = parseInt(subject.charAt(i + cols - 1), 10);
+        iSW = i + cols - 1;
+        digitSW = parseInt(subject.charAt(iSW), 10);
 
         if (thisDigit === digitSW) {
-          swX = xCoord(i + cols - 1);
-          swY = yCoord(i + cols - 1);
+          markEqualNeigbour(iSW);
+          datum.hasEqualNeighbour = true;
+          swX = xCoord(iSW);
+          swY = yCoord(iSW);
 
           linesData.push({
             x1: thisX, x2: swX,
@@ -186,11 +196,15 @@ var render = function(cols, lines, numbers) {
       }
 
       if (!firstRow) { // second row and onwards
-        digitN = parseInt(subject.charAt(i - cols), 10);
-        nX = xCoord(i - cols);
-        nY = yCoord(i - cols);
+        iN = i - cols;
+        digitN = parseInt(subject.charAt(iN), 10);
+        nX = xCoord(iN);
+        nY = yCoord(iN);
 
         if (thisDigit === digitN) {
+          markEqualNeigbour(iN);
+          datum.hasEqualNeighbour = true;
+
           linesData.push({
             x1: thisX, x2: nX,
             y1: thisY, y2: nY,
@@ -200,12 +214,16 @@ var render = function(cols, lines, numbers) {
         }
 
         if (!firstCol) {
-          digitW = parseInt(subject.charAt(i - 1), 10);
-          digitNW = parseInt(subject.charAt(i - cols - 1), 10);
+          iW = i - 1;
+          iNW = i - cols - 1;
+          digitW = parseInt(subject.charAt(iW), 10);
+          digitNW = parseInt(subject.charAt(iNW), 10);
 
           if (thisDigit === digitW) {
-            wX = xCoord(i - 1);
-            wY = yCoord(i - 1);
+            markEqualNeigbour(iW);
+            datum.hasEqualNeighbour = true;
+            wX = xCoord(iW);
+            wY = yCoord(iW);
 
             linesData.push({
               x1: thisX, x2: wX,
@@ -216,8 +234,11 @@ var render = function(cols, lines, numbers) {
           }
 
           if (thisDigit === digitNW) {
-            nwX = xCoord(i - cols - 1);
-            nwY = yCoord(i - cols - 1);
+            markEqualNeigbour(iNW);
+            datum.hasEqualNeighbour = true;
+
+            nwX = xCoord(iNW);
+            nwY = yCoord(iNW);
 
             linesData.push({
               x1: thisX, x2: nwX,
@@ -227,6 +248,32 @@ var render = function(cols, lines, numbers) {
             })
           }
         }
+      }
+
+      if (!lastCol) {
+        // Special case because we can't "mark" neighbours ahead of them being
+        // inserted into circlesData, which is the case of digitSW === thisDigit
+
+        digitNE = parseInt(subject.charAt(i - cols + 1), 10);
+
+        if (thisDigit === digitNE) {
+          if (typeof circlesData[i - cols + 1] !== 'undefined') {
+            circlesData[i - cols + 1].hasEqualNeighbour = true;
+          }
+          datum.hasEqualNeighbour = true;
+        }
+      }
+    }
+
+    circlesData.push(datum)
+  }
+
+
+  // Remove neighbourless circles in third display mode
+  if (displayMode === 2) {
+    for (i = circlesData.length - 1; i >= 0; i -= 1) {
+      if (!circlesData[i].hasEqualNeighbour) {
+        circlesData.splice(i, 1);
       }
     }
   }
@@ -243,17 +290,37 @@ var render = function(cols, lines, numbers) {
       return 'translate(' + d.x + ',' + d.y + ')';
     }
   }
+
+  var colorValve = function(open, colorCode) {
+    if (displayMode === 2) {
+      if (open) {
+        return colorCode;
+      } else {
+        return '#000';
+      }
+    } else {
+      return colorCode;
+    }
+  };
+
   var circleAttr = {
     r: function(d) { return d.r },
     "stroke-width": function(d) { return d.r / 1.4 },
-    "stroke": function(d) { return d.outerColor; },
-    "clip-path": "url(#cstroke)"
+    "stroke": function(d) {
+      return d.outerColor;
+      //return colorValve(d.hasEqualNeighbour, d.outerColor);
+    },
+    "clip-path": "url(#cstroke)",
+    "fill": function(d) {
+      return d.innerColor;
+      //return colorValve(d.hasEqualNeighbour, d.innerColor);
+    }
+
   }
 
   // Enter
-  var groups = circlesSelection.enter().append('g'); 
-  var circle = groups.append('circle').attr(circleAttr).
-    style("fill", function(d) { return d.innerColor; });
+  var groups = circlesSelection.enter().append('g');
+  var circle = groups.append('circle');
 
   // Enter + Update
   circlesSelection.attr(groupAttr).select('circle').attr(circleAttr);
@@ -262,7 +329,7 @@ var render = function(cols, lines, numbers) {
 
   // LINES
 
-  var linesGroup = svg.select('g.lines');
+  var linesGroup = svg.select('g.displayMode');
   var linesSelection = linesGroup.selectAll('line').data(linesData);
 
   var linesAttr = {
@@ -286,7 +353,7 @@ var render = function(cols, lines, numbers) {
 var initSvg = function(svg) {
   svg.append('defs').append('clipPath').attr({id: 'cstroke'}).
     append('circle');
-  svg.append('g').classed('lines', true);
+  svg.append('g').classed('displayMode', true);
   svg.append('g').classed('circles', true);
 }
 
@@ -304,7 +371,7 @@ ready(function() {
   var svg = d3.select("svg");
   initSvg(svg);
 
-  var lines = false;
+  var displayMode = 0;
 
   _phi.on("click", function() {
     d3.event.preventDefault();
@@ -314,7 +381,7 @@ ready(function() {
     _e.classed("active", false);
 
     numbers.setSubject(Numbers.PHI, function() {
-      render(densityValue, lines, numbers);
+      render(densityValue, displayMode, numbers);
     });
   });
 
@@ -326,7 +393,7 @@ ready(function() {
     _e.classed("active", false);
 
     numbers.setSubject(Numbers.PI, function() {
-      render(densityValue, lines, numbers);
+      render(densityValue, displayMode, numbers);
     });
   });
 
@@ -338,7 +405,7 @@ ready(function() {
     _e.classed("active", true);
 
     numbers.setSubject(Numbers.E, function() {
-      render(densityValue, lines, numbers);
+      render(densityValue, displayMode, numbers);
     });
   });
 
@@ -355,7 +422,7 @@ ready(function() {
   var densityValueChanged =  function() {
     densityValue = +this.value;
 
-    render(densityValue, lines, numbers);
+    render(densityValue, displayMode, numbers);
 
     minCols = Math.max(Math.floor(widthRadiusToCols(minWidth, radius)), 1);
     maxCols = Math.floor(widthRadiusToCols(window.innerWidth, radius));
@@ -369,7 +436,7 @@ ready(function() {
 
     svg.attr("width", w);
 
-    render(densityValue, lines, numbers);
+    render(densityValue, displayMode, numbers);
 
     maxDensity = widthRadiusToCols(w, minRadius);
     updateDensitySlider(minDensity, maxDensity, densityValue);
@@ -378,7 +445,7 @@ ready(function() {
   //----------------------------------------------------------------------------
 
   // *sets radius
-  render(densityValue, lines, numbers);
+  render(densityValue, displayMode, numbers);
 
   maxCols = Math.floor(widthRadiusToCols(window.innerWidth, radius));
   minCols = densityValue;
@@ -397,8 +464,8 @@ ready(function() {
   //----------------------------------------------------------------------------
 
   svg.on("click", function() {
-    lines = !lines;
-    render(densityValue, lines, numbers);
+    displayMode = (displayMode + 1) % 3;
+    render(densityValue, displayMode, numbers);
   });
 
   var digits = d3.selectAll('#digits-radio input');
@@ -406,7 +473,7 @@ ready(function() {
     var value = +this.value;
 
     numbers.setDigits(+this.value, function() {
-      render(densityValue, lines, numbers);
+      render(densityValue, displayMode, numbers);
     });
   };
 
