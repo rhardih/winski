@@ -130,6 +130,8 @@ var render = function(cols, lines, numbers) {
   var thisX, nextX, thisY, nextY;
   var thisColor;
   var lastRow;
+  var datum;
+  var i;
   var xCoord = function(i) {
     return padding + (i % cols) * (gridSpacing + 2 * radius);
   }
@@ -144,7 +146,7 @@ var render = function(cols, lines, numbers) {
   height = (2 * padding) + (limit / cols) * (2 * radius) + ((limit / cols) - 1) * gridSpacing;
   svg.attr("height", height);
 
-  for (var i = 0; i < limit; i++) {
+  for (i = 0; i < limit; i++) {
     thisDigit = nextDigit;
     nextDigit = parseInt(subject.charAt(i + 1), 10);
     thisColor = colors[thisDigit];
@@ -156,7 +158,7 @@ var render = function(cols, lines, numbers) {
     firstRow = i <= cols;
     lastRow = i >= (limit - cols - 1);
 
-    var datum = {
+    datum = {
       outerColor: thisColor,
       innerColor: colors[nextDigit],
       x: thisX,
