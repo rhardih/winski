@@ -120,16 +120,16 @@ var render = function(cols, lines, numbers) {
   var subject = numbers.subjectValue();
   var limit = subject.length;
   var width = svg.attr("width");
-	var heigth;
-	var strokeWidth;
-	var circlesData = [];
-	var linesData = [];
-	var thisDigit;
-	var digitSW, digitW, digitNW, digitN;
-	var nextDigit = 3;
-	var thisX, nextX, thisY, nextY;
-	var thisColor;
-	var xIndex;
+  var heigth;
+  var strokeWidth;
+  var circlesData = [];
+  var linesData = [];
+  var thisDigit;
+  var digitSW, digitW, digitNW, digitN;
+  var nextDigit = 3;
+  var thisX, nextX, thisY, nextY;
+  var thisColor;
+  var lastRow;
   var xCoord = function(i) {
     return padding + (i % cols) * (gridSpacing + 2 * radius);
   }
@@ -152,7 +152,9 @@ var render = function(cols, lines, numbers) {
     thisY = yCoord(i);
     nextX = xCoord(i + 1);
     nextY = yCoord(i + 1);
-    xIndex = i % cols;
+    firstCol = i % cols === 0;
+    firstRow = i <= cols;
+    lastRow = i >= (limit - cols - 1);
 
     var datum = {
       outerColor: thisColor,
@@ -164,62 +166,64 @@ var render = function(cols, lines, numbers) {
 
     circlesData.push(datum)
 
-    if (lines && i > cols) { // second row and onwards
-      digitN = parseInt(subject.charAt(i - cols), 10);
-      nX = xCoord(i - cols);
-      nY = yCoord(i - cols);
+    if (lines) {
+      if (!firstCol && !lastRow) {
+        digitSW = parseInt(subject.charAt(i + cols - 1), 10);
 
-      if (thisDigit === digitN) {
-        linesData.push({
-          x1: thisX, x2: nX,
-          y1: thisY, y2: nY,
-          color: thisColor,
-          "stroke-width": datum.r
-        })
+        if (thisDigit === digitSW) {
+          swX = xCoord(i + cols - 1);
+          swY = yCoord(i + cols - 1);
+
+          linesData.push({
+            x1: thisX, x2: swX,
+            y1: thisY, y2: swY,
+            color: thisColor,
+            "stroke-width": datum.r
+          })
+        }
       }
 
-      if (xIndex > 0) {
-        digitW = parseInt(subject.charAt(i - 1), 10);
-        digitNW = parseInt(subject.charAt(i - cols - 1), 10);
+      if (!firstRow) { // second row and onwards
+        digitN = parseInt(subject.charAt(i - cols), 10);
+        nX = xCoord(i - cols);
+        nY = yCoord(i - cols);
 
-        if (i < (limit - cols - 1)) {
-          digitSW = parseInt(subject.charAt(i + cols - 1), 10);
+        if (thisDigit === digitN) {
+          linesData.push({
+            x1: thisX, x2: nX,
+            y1: thisY, y2: nY,
+            color: thisColor,
+            "stroke-width": datum.r
+          })
+        }
 
-          if (thisDigit === digitSW) {
-            swX = xCoord(i + cols - 1);
-            swY = yCoord(i + cols - 1);
+        if (!firstCol) {
+          digitW = parseInt(subject.charAt(i - 1), 10);
+          digitNW = parseInt(subject.charAt(i - cols - 1), 10);
+
+          if (thisDigit === digitW) {
+            wX = xCoord(i - 1);
+            wY = yCoord(i - 1);
 
             linesData.push({
-              x1: thisX, x2: swX,
-              y1: thisY, y2: swY,
+              x1: thisX, x2: wX,
+              y1: thisY, y2: wY,
               color: thisColor,
               "stroke-width": datum.r
             })
           }
-        }
 
-        if (thisDigit === digitW) {
-          wX = xCoord(i - 1);
-          wY = yCoord(i - 1);
+          if (thisDigit === digitNW) {
+            nwX = xCoord(i - cols - 1);
+            nwY = yCoord(i - cols - 1);
 
-          linesData.push({
-            x1: thisX, x2: wX,
-            y1: thisY, y2: wY,
-            color: thisColor,
-            "stroke-width": datum.r
-          })
-        }
-
-        if (thisDigit === digitNW) {
-          nwX = xCoord(i - cols - 1);
-          nwY = yCoord(i - cols - 1);
-
-          linesData.push({
-            x1: thisX, x2: nwX,
-            y1: thisY, y2: nwY,
-            color: thisColor,
-            "stroke-width": datum.r
-          })
+            linesData.push({
+              x1: thisX, x2: nwX,
+              y1: thisY, y2: nwY,
+              color: thisColor,
+              "stroke-width": datum.r
+            })
+          }
         }
       }
     }
