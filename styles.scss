@@ -112,8 +112,8 @@ p {
   width: 768px;
 }
 
-$colors: #DA416C #F15637 #E35736 #E8BA3B #F3C92D #A0AA39 #5DA33F #1D91DA #3C5481
-#91477B;
+$colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
+  #92278B;
 
 @each $color in $colors {
   $i: index($colors, $color) - 1;
