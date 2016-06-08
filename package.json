@@ -1,5 +1,5 @@
 {
-  "name": "krzywinski",
+  "name": "winski",
   "version": "1.0.0",
   "description": "foo",
   "main": "script.js",
@@ -9,12 +9,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rhardih/krzywinski.git"
+    "url": "git+https://github.com/rhardih/winski.git"
   },
   "author": "René Hansen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rhardih/krzywinski/issues"
+    "url": "https://github.com/rhardih/winski/issues"
   },
-  "homepage": "https://github.com/rhardih/krzywinski#readme"
+  "homepage": "https://github.com/rhardih/winski#readme"
 }
