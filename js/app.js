@@ -1,4 +1,3 @@
-(function() {
 function ready(fn) {
   if (document.readyState != 'loading'){
     fn();
@@ -505,5 +504,3 @@ ready(function() {
 
   digits.on('change', onDigitsChange);
 });
-})();
-
