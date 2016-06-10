@@ -6,7 +6,7 @@
   "scripts": {
     "scss": "sass --watch styles.scss:styles.css --style compressed",
     "watch": "watchify js/app.js -o js/app.bundle.js --debug --verbose",
-    "build": "watchify js/app.js -o js/app.bundle.js",
+    "build": "browserify js/app.js | bundle-collapser > js/app.bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
