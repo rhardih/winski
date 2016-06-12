@@ -83,7 +83,7 @@ var StageView = View.extend({
 
       this.svg.append('defs').append('clipPath').attr({id: 'cstroke'}).
         append('circle');
-      this.svg.append('g').classed('displayMode', true);
+      this.svg.append('g').classed('lines', true);
       this.svg.append('g').classed('circles', true);
     }
 
@@ -302,7 +302,7 @@ var StageView = View.extend({
 
     // LINES
 
-    var linesGroup = svg.select('g.displayMode');
+    var linesGroup = svg.select('g.lines');
     var linesSelection = linesGroup.selectAll('line').data(linesData);
 
     var linesAttr = {
