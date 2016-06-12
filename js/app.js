@@ -16,6 +16,51 @@ function ready(fn) {
 
 //------------------------------------------------------------------------------
 
+var StageState = State.extend({
+  props: {
+    width: ['number', true, 768],
+    displayMode: ['number', true, 0],
+    subjectValue: ['string', true, ''],
+    densityValue: ['number', true, 20],
+    spacing: ['number', true, 25]
+  },
+
+  minWidth: 768,
+  minRadius: 0.5,
+
+  derived: {
+    dRadius: {
+      deps: ['width', 'densityValue', 'spacing'],
+      fn: function() {
+        // width: 2 * (spacing + radius) + (cols - 1) * (2 * radius +
+        // spacing)
+        // w = 2 * (g + r) + (c - 1) * (2 * r + g)
+        // w = c * g + 2 * c * r + g
+        // (w - (c * g) - g) / (2 * c) = r
+        var tmp = (this.width - (this.densityValue * this.spacing) -
+                  this.spacing) / (2 * this.densityValue);
+        return tmp;
+      }
+    }
+  },
+
+  widthRadiusToCols: function(width, radius) {
+    // w = c *(g + 2 * r) + g
+    // (w - g) / (g + 2 * r) = c
+    return (width - this.spacing) / (this.spacing + 2 * radius);
+  },
+
+  radiusDensityToWidth: function(radius, density) {
+    return density * this.spacing + 2 * density * radius + this.spacing;
+  },
+
+  cycleDisplayMode: function() {
+    this.displayMode = (this.displayMode + 1) % 3;
+  }
+});
+
+//------------------------------------------------------------------------------
+
 ready(function() {
   var _densitySlider = d3.select("#density-slider");
   var _colsSlider = d3.select("#columns-slider");
@@ -31,50 +76,9 @@ ready(function() {
 
   //----------------------------------------------------------------------------
 
-  var StageState = State.extend({
-    props: {
-      width: ['number', true, 768],
-      displayMode: ['number', true, 0],
-      subjectValue: ['string', true, numbers.subjectValue()],
-      densityValue: ['number', true, 20],
-      spacing: ['number', true, 25]
-    },
-
-    minWidth: 768,
-    minRadius: 0.5,
-
-    derived: {
-      dRadius: {
-        deps: ['width', 'densityValue', 'spacing'],
-        fn: function() {
-          // width: 2 * (spacing + radius) + (cols - 1) * (2 * radius +
-          // spacing)
-          // w = 2 * (g + r) + (c - 1) * (2 * r + g)
-          // w = c * g + 2 * c * r + g
-          // (w - (c * g) - g) / (2 * c) = r
-          var tmp = (this.width - (this.densityValue * this.spacing) -
-                    this.spacing) / (2 * this.densityValue);
-          return tmp;
-        }
-      }
-    },
-
-    widthRadiusToCols: function(width, radius) {
-      // w = c *(g + 2 * r) + g
-      // (w - g) / (g + 2 * r) = c
-      return (width - this.spacing) / (this.spacing + 2 * radius);
-    },
-
-    radiusDensityToWidth: function(radius, density) {
-      return density * this.spacing + 2 * density * radius + this.spacing;
-    },
-
-    cycleDisplayMode: function() {
-      this.displayMode = (this.displayMode + 1) % 3;
-    }
+  var stageState = new StageState({
+    subjectValue: numbers.subjectValue()
   });
-
-  var stageState = new StageState();
 
   var stageView = new StageView({
     model: stageState,
