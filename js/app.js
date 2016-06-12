@@ -30,18 +30,9 @@ var colors = [
 var minWidth = 768;
 var minRadius = 0.5;
 
-var radius;
 var gridSpacing = 25;
 var padding;
 var alreadyWarned = false;
-
-var widthColsToRadius = function(width, cols) {
-  // width: 2 * (gridSpacing + radius) + (cols - 1) * (2 * radius + gridSpacing)
-	// w = 2 * (g + r) + (c - 1) * (2 * r + g)
-  // w = c * g + 2 * c * r + g
-  // (w - (c * g) - g) / (2 * c) = r
-  return (width - (cols * gridSpacing) - gridSpacing) / (2 * cols);
-}
 
 var radiusDensityToWidth = function(radius, cols) {
   return cols * gridSpacing + 2 * cols * radius + gridSpacing;
@@ -107,6 +98,7 @@ var StageView = View.extend({
     var firstCol, lastCol, firstRow, lastRow;
     var datum;
     var i, xIndex;
+    var radius = this.model.dRadius;
     var xCoord = function(i) {
       return padding + (i % cols) * (gridSpacing + 2 * radius);
     }
@@ -118,7 +110,6 @@ var StageView = View.extend({
         circlesData[i].hasEqualNeighbour = true;
       }
     };
-    radius = widthColsToRadius(width, cols);
     strokeWidth = radius / 2.5;
     padding = radius + gridSpacing;
 
@@ -346,7 +337,24 @@ ready(function() {
       width: ['number', true, 768],
       displayMode: ['number', true, 0],
       subjectValue: ['string', true, numbers.subjectValue()],
-      densityValue: ['number', true, 20]
+      densityValue: ['number', true, 20],
+      spacing: ['number', true, 25]
+    },
+
+    derived: {
+      dRadius: {
+        deps: ['width', 'densityValue', 'spacing'],
+        fn: function() {
+          // width: 2 * (gridSpacing + radius) + (cols - 1) * (2 * radius +
+          // gridSpacing)
+          // w = 2 * (g + r) + (c - 1) * (2 * r + g)
+          // w = c * g + 2 * c * r + g
+          // (w - (c * g) - g) / (2 * c) = r
+          var tmp = (this.width - (this.densityValue * this.spacing) -
+                    this.spacing) / (2 * this.densityValue);
+          return tmp;
+        }
+      }
     },
 
     cycleDisplayMode: function() {
@@ -416,8 +424,8 @@ ready(function() {
   var densityValueChanged =  function() {
     stageState.densityValue = +this.value;
 
-    minCols = Math.max(Math.floor(widthRadiusToCols(minWidth, radius)), 1);
-    maxCols = Math.floor(widthRadiusToCols(window.innerWidth, radius));
+    minCols = Math.max(Math.floor(widthRadiusToCols(minWidth, stageState.dRadius)), 1);
+    maxCols = Math.floor(widthRadiusToCols(window.innerWidth, stageState.dRadius));
     updateColsSlider(minCols, maxCols, stageState.densityValue);
   };
 
@@ -426,7 +434,7 @@ ready(function() {
 
     stageState.set({
       densityValue: v,
-      width: radiusDensityToWidth(radius,  v)
+      width: radiusDensityToWidth(stageState.dRadius,  v)
     });
 
     maxDensity = widthRadiusToCols(stageState.width, minRadius);
@@ -437,7 +445,7 @@ ready(function() {
 
   stageState.trigger('change'); // render
 
-  maxCols = Math.floor(widthRadiusToCols(window.innerWidth, radius));
+  maxCols = Math.floor(widthRadiusToCols(window.innerWidth, stageState.dRadius));
   minCols = stageState.densityValue;
 
   maxDensity = widthRadiusToCols(minWidth, minRadius);
