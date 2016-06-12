@@ -15,26 +15,6 @@ function ready(fn) {
 
 //------------------------------------------------------------------------------
 
-var colors = [
-  "#ED2079",
-  "#ED3E36",
-  "#F76321",
-  "#FFB73B",
-  "#F5EC2B",
-  "#8DC53A",
-  "#37B347",
-  "#00ABEE",
-  "#283891",
-  "#92278B"
-];
-var minWidth = 768;
-var minRadius = 0.5;
-
-var padding;
-var alreadyWarned = false;
-
-//------------------------------------------------------------------------------
-
 var StageView = View.extend({
   template: '<svg id="stage"></svg>',
 
@@ -54,6 +34,10 @@ var StageView = View.extend({
   },
 
   svg: null,
+  colors:  [
+    "#ED2079", "#ED3E36", "#F76321", "#FFB73B", "#F5EC2B",
+    "#8DC53A", "#37B347", "#00ABEE", "#283891", "#92278B"
+  ],
 
   render: function() {
     if (!this.rendered) {
@@ -90,6 +74,7 @@ var StageView = View.extend({
     var datum;
     var i, xIndex;
     var radius = this.model.dRadius;
+    var padding = radius + this.model.spacing;
     var xCoord = function(i) {
       return padding + (i % cols) * (that.model.spacing + 2 * radius);
     }
@@ -102,7 +87,6 @@ var StageView = View.extend({
       }
     };
     strokeWidth = radius / 2.5;
-    padding = radius + this.model.spacing;
 
     height = (2 * padding) + (limit / cols) * (2 * radius) + ((limit / cols) - 1) * this.model.spacing;
     svg.attr("height", height);
@@ -110,7 +94,7 @@ var StageView = View.extend({
     for (i = 0; i < limit; i++) {
       thisDigit = nextDigit;
       nextDigit = parseInt(subject.charAt(i + 1), 10);
-      thisColor = colors[thisDigit];
+      thisColor = this.colors[thisDigit];
       thisX = xCoord(i);
       thisY = yCoord(i);
       nextX = xCoord(i + 1);
@@ -123,7 +107,7 @@ var StageView = View.extend({
 
       datum = {
         outerColor: thisColor,
-        innerColor: colors[nextDigit],
+        innerColor: this.colors[nextDigit],
         x: thisX,
         y: thisY,
         r: radius,
@@ -332,6 +316,9 @@ ready(function() {
       spacing: ['number', true, 25]
     },
 
+    minWidth: 768,
+    minRadius: 0.5,
+
     derived: {
       dRadius: {
         deps: ['width', 'densityValue', 'spacing'],
@@ -425,7 +412,7 @@ ready(function() {
   var densityValueChanged =  function() {
     stageState.densityValue = +this.value;
 
-    minCols = Math.max(Math.floor(stageState.widthRadiusToCols(minWidth, stageState.dRadius)), 1);
+    minCols = Math.max(Math.floor(stageState.widthRadiusToCols(stageState.minWidth, stageState.dRadius)), 1);
     maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
     updateColsSlider(minCols, maxCols, stageState.densityValue);
   };
@@ -438,7 +425,7 @@ ready(function() {
       width: stageState.radiusDensityToWidth(stageState.dRadius,  v)
     });
 
-    maxDensity = stageState.widthRadiusToCols(stageState.width, minRadius);
+    maxDensity = stageState.widthRadiusToCols(stageState.width, stageState.minRadius);
     updateDensitySlider(minDensity, maxDensity, v);
   };
 
@@ -449,7 +436,7 @@ ready(function() {
   maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
   minCols = stageState.densityValue;
 
-  maxDensity = stageState.widthRadiusToCols(minWidth, minRadius);
+  maxDensity = stageState.widthRadiusToCols(stageState.minWidth, stageState.minRadius);
 
   updateDensitySlider(minDensity, maxDensity, stageState.densityValue);
   updateColsSlider(minCols, maxCols, minCols);
@@ -463,6 +450,8 @@ ready(function() {
   //----------------------------------------------------------------------------
 
   var digits = d3.selectAll('#digits-radio input');
+  var alreadyWarned = false;
+
   var onDigitsChange = function() {
     var value = +this.value;
 
