@@ -73,23 +73,25 @@ var StageView = View.extend({
     }
   },
 
+  svg: null,
+
   render: function() {
     if (!this.rendered) {
       View.prototype.render.apply(this, arguments);
 
-      var svg = d3.select(this.el);
+      this.svg = d3.select(this.el);
 
-      svg.append('defs').append('clipPath').attr({id: 'cstroke'}).
+      this.svg.append('defs').append('clipPath').attr({id: 'cstroke'}).
         append('circle');
-      svg.append('g').classed('displayMode', true);
-      svg.append('g').classed('circles', true);
+      this.svg.append('g').classed('displayMode', true);
+      this.svg.append('g').classed('circles', true);
     }
 
     var cols = this.model.densityValue;
     var displayMode = this.model.displayMode;
     var subject = this.model.subjectValue;
 
-    var svg = d3.select("svg");
+    var svg = this.svg;
     var limit = subject.length;
     var width = svg.attr("width");
     var heigth;
@@ -116,7 +118,6 @@ var StageView = View.extend({
         circlesData[i].hasEqualNeighbour = true;
       }
     };
-
     radius = widthColsToRadius(width, cols);
     strokeWidth = radius / 2.5;
     padding = radius + gridSpacing;
