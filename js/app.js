@@ -326,7 +326,7 @@ var StageView = View.extend({
 ready(function() {
   var _densitySlider = d3.select("#density-slider");
   var _colsSlider = d3.select("#columns-slider");
-  var minDensity = 1, maxDensity = 29, densityValue = 20;
+  var minDensity = 1, maxDensity = 29;
   var minCols = 1, maxCols = 29, colsValue = 20;
   var numbers = new Numbers();
 
@@ -342,7 +342,8 @@ ready(function() {
     props: {
       width: ['number', true, 768],
       displayMode: ['number', true, 0],
-      subjectValue: ['string', true, numbers.subjectValue()]
+      subjectValue: ['string', true, numbers.subjectValue()],
+      densityValue: ['number', true, 20]
     },
 
     cycleDisplayMode: function() {
@@ -359,6 +360,7 @@ ready(function() {
 
   stageState.on('change', function() {
     stageView.render();
+    render(stageState.densityValue, stageState.displayMode, stageState.subjectValue);
   })
 
   //----------------------------------------------------------------------------
@@ -372,8 +374,6 @@ ready(function() {
 
     numbers.setSubject(Numbers.PHI, function() {
       stageState.subjectValue = numbers.subjectValue();
-
-      render(densityValue, stageState.displayMode, stageState.subjectValue);
     });
   });
 
@@ -386,8 +386,6 @@ ready(function() {
 
     numbers.setSubject(Numbers.PI, function() {
       stageState.subjectValue = numbers.subjectValue();
-
-      render(densityValue, stageState.displayMode, stageState.subjectValue);
     });
   });
 
@@ -400,8 +398,6 @@ ready(function() {
 
     numbers.setSubject(Numbers.E, function() {
       stageState.subjectValue = numbers.subjectValue();
-
-      render(densityValue, stageState.displayMode, stageState.subjectValue);
     });
   });
 
@@ -416,39 +412,36 @@ ready(function() {
   }
 
   var densityValueChanged =  function() {
-    densityValue = +this.value;
-
-    render(densityValue, stageState.displayMode, stageState.subjectValue);
+    stageState.densityValue = +this.value;
 
     minCols = Math.max(Math.floor(widthRadiusToCols(minWidth, radius)), 1);
     maxCols = Math.floor(widthRadiusToCols(window.innerWidth, radius));
-    updateColsSlider(minCols, maxCols, densityValue);
+    updateColsSlider(minCols, maxCols, stageState.densityValue);
   };
 
   var columnsValueChanged = function() {
-    densityValue = +this.value;
+    var v = +this.value;
 
-    var w = radiusDensityToWidth(radius,  densityValue);
+    stageState.set({
+      densityValue: v,
+      width: radiusDensityToWidth(radius,  v)
+    });
 
-    stageState.width = w;
-
-    render(densityValue, stageState.displayMode, stageState.subjectValue);
-
-    maxDensity = widthRadiusToCols(w, minRadius);
-    updateDensitySlider(minDensity, maxDensity, densityValue);
+    maxDensity = widthRadiusToCols(stageState.width, minRadius);
+    updateDensitySlider(minDensity, maxDensity, v);
   };
 
   //----------------------------------------------------------------------------
 
   // *sets radius
-  render(densityValue, stageState.displayMode, stageState.subjectValue);
+  render(stageState.densityValue, stageState.displayMode, stageState.subjectValue);
 
   maxCols = Math.floor(widthRadiusToCols(window.innerWidth, radius));
-  minCols = densityValue;
+  minCols = stageState.densityValue;
 
   maxDensity = widthRadiusToCols(minWidth, minRadius);
 
-  updateDensitySlider(minDensity, maxDensity, densityValue);
+  updateDensitySlider(minDensity, maxDensity, stageState.densityValue);
   updateColsSlider(minCols, maxCols, minCols);
 
   _densitySlider.on("change", densityValueChanged);
@@ -459,16 +452,12 @@ ready(function() {
 
   //----------------------------------------------------------------------------
 
-  stageState.on("change:displayMode", function() {
-    render(densityValue, stageState.displayMode, stageState.subjectValue);
-  });
-
   var digits = d3.selectAll('#digits-radio input');
   var onDigitsChange = function() {
     var value = +this.value;
 
     numbers.setDigits(+this.value, function() {
-      render(densityValue, stageState.displayMode, stageState.subjectValue);
+      render(stageState.densityValue, stageState.displayMode, stageState.subjectValue);
     });
   };
 
