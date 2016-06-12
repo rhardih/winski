@@ -5,8 +5,8 @@
   "main": "script.js",
   "scripts": {
     "scss": "sass --watch styles.scss:styles.css --style compressed",
-    "watch": "watchify js/app.js -o js/app.bundle.js --debug --verbose",
-    "build": "browserify js/app.js | bundle-collapser > js/app.bundle.js",
+    "watch": "watchify -t hbsfy js/app.js -o js/app.bundle.js --debug --verbose",
+    "build": "browserify -t hbsfy js/app.js | bundle-collapser > js/app.bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,5 +18,16 @@
   "bugs": {
     "url": "https://github.com/rhardih/winski/issues"
   },
-  "homepage": "https://github.com/rhardih/winski#readme"
+  "homepage": "https://github.com/rhardih/winski#readme",
+  "dependencies": {
+    "ampersand-state": "^5.0.2",
+    "ampersand-view": "^10.0.1",
+    "handlebars": "^4.0.5",
+    "hbsfy": "^2.7.0"
+  },
+  "devDependencies": {
+    "bundle-collapser": "^1.2.1",
+    "uglifyjs": "^2.4.10",
+    "watchify": "^3.7.0"
+  }
 }
