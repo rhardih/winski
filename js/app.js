@@ -30,19 +30,8 @@ var colors = [
 var minWidth = 768;
 var minRadius = 0.5;
 
-var gridSpacing = 25;
 var padding;
 var alreadyWarned = false;
-
-var radiusDensityToWidth = function(radius, cols) {
-  return cols * gridSpacing + 2 * cols * radius + gridSpacing;
-}
-
-var widthRadiusToCols = function(width, radius) {
-  // w = c *(g + 2 * r) + g
-  // (w - g) / (g + 2 * r) = c
-  return (width - gridSpacing) / (gridSpacing + 2 * radius);
-}
 
 //------------------------------------------------------------------------------
 
@@ -78,6 +67,8 @@ var StageView = View.extend({
       this.svg.append('g').classed('circles', true);
     }
 
+    var that = this;
+
     var cols = this.model.densityValue;
     var displayMode = this.model.displayMode;
     var subject = this.model.subjectValue;
@@ -100,10 +91,10 @@ var StageView = View.extend({
     var i, xIndex;
     var radius = this.model.dRadius;
     var xCoord = function(i) {
-      return padding + (i % cols) * (gridSpacing + 2 * radius);
+      return padding + (i % cols) * (that.model.spacing + 2 * radius);
     }
     var yCoord = function(i) {
-      return padding + Math.floor(i / cols) * (gridSpacing + 2 * radius);
+      return padding + Math.floor(i / cols) * (that.model.spacing + 2 * radius);
     }
     var markEqualNeigbour = function(i) {
       if (typeof circlesData[i] !== 'undefined') {
@@ -111,9 +102,9 @@ var StageView = View.extend({
       }
     };
     strokeWidth = radius / 2.5;
-    padding = radius + gridSpacing;
+    padding = radius + this.model.spacing;
 
-    height = (2 * padding) + (limit / cols) * (2 * radius) + ((limit / cols) - 1) * gridSpacing;
+    height = (2 * padding) + (limit / cols) * (2 * radius) + ((limit / cols) - 1) * this.model.spacing;
     svg.attr("height", height);
 
     for (i = 0; i < limit; i++) {
@@ -345,8 +336,8 @@ ready(function() {
       dRadius: {
         deps: ['width', 'densityValue', 'spacing'],
         fn: function() {
-          // width: 2 * (gridSpacing + radius) + (cols - 1) * (2 * radius +
-          // gridSpacing)
+          // width: 2 * (spacing + radius) + (cols - 1) * (2 * radius +
+          // spacing)
           // w = 2 * (g + r) + (c - 1) * (2 * r + g)
           // w = c * g + 2 * c * r + g
           // (w - (c * g) - g) / (2 * c) = r
@@ -355,6 +346,16 @@ ready(function() {
           return tmp;
         }
       }
+    },
+
+    widthRadiusToCols: function(width, radius) {
+      // w = c *(g + 2 * r) + g
+      // (w - g) / (g + 2 * r) = c
+      return (width - this.spacing) / (this.spacing + 2 * radius);
+    },
+
+    radiusDensityToWidth: function(radius, density) {
+      return density * this.spacing + 2 * density * radius + this.spacing;
     },
 
     cycleDisplayMode: function() {
@@ -424,8 +425,8 @@ ready(function() {
   var densityValueChanged =  function() {
     stageState.densityValue = +this.value;
 
-    minCols = Math.max(Math.floor(widthRadiusToCols(minWidth, stageState.dRadius)), 1);
-    maxCols = Math.floor(widthRadiusToCols(window.innerWidth, stageState.dRadius));
+    minCols = Math.max(Math.floor(stageState.widthRadiusToCols(minWidth, stageState.dRadius)), 1);
+    maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
     updateColsSlider(minCols, maxCols, stageState.densityValue);
   };
 
@@ -434,10 +435,10 @@ ready(function() {
 
     stageState.set({
       densityValue: v,
-      width: radiusDensityToWidth(stageState.dRadius,  v)
+      width: stageState.radiusDensityToWidth(stageState.dRadius,  v)
     });
 
-    maxDensity = widthRadiusToCols(stageState.width, minRadius);
+    maxDensity = stageState.widthRadiusToCols(stageState.width, minRadius);
     updateDensitySlider(minDensity, maxDensity, v);
   };
 
@@ -445,10 +446,10 @@ ready(function() {
 
   stageState.trigger('change'); // render
 
-  maxCols = Math.floor(widthRadiusToCols(window.innerWidth, stageState.dRadius));
+  maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
   minCols = stageState.densityValue;
 
-  maxDensity = widthRadiusToCols(minWidth, minRadius);
+  maxDensity = stageState.widthRadiusToCols(minWidth, minRadius);
 
   updateDensitySlider(minDensity, maxDensity, stageState.densityValue);
   updateColsSlider(minCols, maxCols, minCols);
