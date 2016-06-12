@@ -1,4 +1,9 @@
+var State = require('ampersand-state');
+var View = require('ampersand-view');
+
 var Numbers = require('./numbers.js');
+
+//------------------------------------------------------------------------------
 
 function ready(fn) {
   if (document.readyState != 'loading'){
@@ -283,12 +288,41 @@ var render = function(cols, displayMode, numbers) {
   linesSelection.exit().remove();
 };
 
-var initSvg = function(svg) {
-  svg.append('defs').append('clipPath').attr({id: 'cstroke'}).
-    append('circle');
-  svg.append('g').classed('displayMode', true);
-  svg.append('g').classed('circles', true);
-}
+//------------------------------------------------------------------------------
+
+var StageView = View.extend({
+  template: '<svg id="stage"></svg>',
+
+  autoRender: true,
+
+  bindings: {
+    "model.width": {
+      type: "attribute",
+      name: "width"
+    }
+  },
+
+  events: {
+    'click': function() {
+      this.model.cycleDisplayMode();
+    }
+  },
+
+  render: function() {
+    if (!this.rendered) {
+      View.prototype.render.apply(this, arguments);
+
+      var svg = d3.select(this.el);
+
+      svg.append('defs').append('clipPath').attr({id: 'cstroke'}).
+        append('circle');
+      svg.append('g').classed('displayMode', true);
+      svg.append('g').classed('circles', true);
+    }
+  }
+});
+
+//------------------------------------------------------------------------------
 
 ready(function() {
   var _densitySlider = d3.select("#density-slider");
@@ -302,9 +336,32 @@ ready(function() {
   var _e = d3.select("#e-link");
 
   var svg = d3.select("svg");
-  initSvg(svg);
 
-  var displayMode = 0;
+  //----------------------------------------------------------------------------
+
+  var StageState = State.extend({
+    props: {
+      width: ['number', true, 768],
+      displayMode: ['number', true, 0]
+    },
+
+    cycleDisplayMode: function() {
+      this.displayMode = (this.displayMode + 1) % 3;
+    }
+  });
+
+  var stageState = new StageState();
+
+  var stageView = new StageView({
+    model: stageState,
+    el: svg[0][0]
+  });
+
+  stageState.on('change', function() {
+    stageView.render();
+  })
+
+  //----------------------------------------------------------------------------
 
   _phi.on("click", function() {
     d3.event.preventDefault();
@@ -314,7 +371,7 @@ ready(function() {
     _e.classed("active", false);
 
     numbers.setSubject(Numbers.PHI, function() {
-      render(densityValue, displayMode, numbers);
+      render(densityValue, stageState.displayMode, numbers);
     });
   });
 
@@ -326,7 +383,7 @@ ready(function() {
     _e.classed("active", false);
 
     numbers.setSubject(Numbers.PI, function() {
-      render(densityValue, displayMode, numbers);
+      render(densityValue, stageState.displayMode, numbers);
     });
   });
 
@@ -338,7 +395,7 @@ ready(function() {
     _e.classed("active", true);
 
     numbers.setSubject(Numbers.E, function() {
-      render(densityValue, displayMode, numbers);
+      render(densityValue, stageState.displayMode, numbers);
     });
   });
 
@@ -355,7 +412,7 @@ ready(function() {
   var densityValueChanged =  function() {
     densityValue = +this.value;
 
-    render(densityValue, displayMode, numbers);
+    render(densityValue, stageState.displayMode, numbers);
 
     minCols = Math.max(Math.floor(widthRadiusToCols(minWidth, radius)), 1);
     maxCols = Math.floor(widthRadiusToCols(window.innerWidth, radius));
@@ -367,9 +424,9 @@ ready(function() {
 
     var w = radiusDensityToWidth(radius,  densityValue);
 
-    svg.attr("width", w);
+    stageState.width = w;
 
-    render(densityValue, displayMode, numbers);
+    render(densityValue, stageState.displayMode, numbers);
 
     maxDensity = widthRadiusToCols(w, minRadius);
     updateDensitySlider(minDensity, maxDensity, densityValue);
@@ -378,7 +435,7 @@ ready(function() {
   //----------------------------------------------------------------------------
 
   // *sets radius
-  render(densityValue, displayMode, numbers);
+  render(densityValue, stageState.displayMode, numbers);
 
   maxCols = Math.floor(widthRadiusToCols(window.innerWidth, radius));
   minCols = densityValue;
@@ -396,9 +453,8 @@ ready(function() {
 
   //----------------------------------------------------------------------------
 
-  svg.on("click", function() {
-    displayMode = (displayMode + 1) % 3;
-    render(densityValue, displayMode, numbers);
+  stageState.on("change:displayMode", function() {
+    render(densityValue, stageState.displayMode, numbers);
   });
 
   var digits = d3.selectAll('#digits-radio input');
@@ -406,7 +462,7 @@ ready(function() {
     var value = +this.value;
 
     numbers.setDigits(+this.value, function() {
-      render(densityValue, displayMode, numbers);
+      render(densityValue, stageState.displayMode, numbers);
     });
   };
 
