@@ -3,6 +3,7 @@ var View = require('ampersand-view');
 
 var Numbers = require('./numbers.js');
 var StageView = require('./views/stage.js');
+var ControlsView = require('./views/controls.js');
 
 //------------------------------------------------------------------------------
 
@@ -16,6 +17,24 @@ function ready(fn) {
 
 //------------------------------------------------------------------------------
 
+var SliderState = State.extend({
+  props: {
+    min: ['number', true, 1],
+    max: ['number', true, 1],
+    value: ['number', true, 1],
+  }
+});
+
+var ControlsState = State.extend({
+  props: {
+    subjectName: ['string', true, Numbers.PI],
+  },
+  children: {
+    density: SliderState,
+    columns: SliderState
+  }
+});
+
 var StageState = State.extend({
   props: {
     width: ['number', true, 768],
@@ -23,6 +42,10 @@ var StageState = State.extend({
     subjectValue: ['string', true, ''],
     densityValue: ['number', true, 20],
     spacing: ['number', true, 25]
+  },
+
+  children: {
+    controls: ControlsState
   },
 
   minWidth: 768,
@@ -62,22 +85,19 @@ var StageState = State.extend({
 //------------------------------------------------------------------------------
 
 ready(function() {
-  var _densitySlider = d3.select("#density-slider");
-  var _colsSlider = d3.select("#columns-slider");
-  var minDensity = 1, maxDensity = 29;
-  var minCols = 1, maxCols = 29, colsValue = 20;
   var numbers = new Numbers();
 
-  var _phi = d3.select("#phi-link");
-  var _pi = d3.select("#pi-link");
-  var _e = d3.select("#e-link");
-
   var svg = d3.select("svg");
+  var controlsEl = document.querySelector('#dropdown-controls');
 
   //----------------------------------------------------------------------------
 
   var stageState = new StageState({
-    subjectValue: numbers.subjectValue()
+    subjectValue: numbers.subjectValue(),
+    controls: {
+      density: { min: 1, max: 29, value: 20 },
+      columns: { min: 1, max: 29, value: 20 }
+    }
   });
 
   var stageView = new StageView({
@@ -85,95 +105,56 @@ ready(function() {
     el: svg[0][0]
   });
 
-  stageState.on('change', function() {
-    stageView.render();
+  stageState.controls.on('change:subjectName', function(e) {
+    numbers.setSubject(this.subjectName, function() {
+      stageState.subjectValue = numbers.subjectValue();
+    });
   })
 
-  //----------------------------------------------------------------------------
-
-  _phi.on("click", function() {
-    d3.event.preventDefault();
-
-    _phi.classed("active", true);
-    _pi.classed("active", false);
-    _e.classed("active", false);
-
-    numbers.setSubject(Numbers.PHI, function() {
-      stageState.subjectValue = numbers.subjectValue();
-    });
-  });
-
-  _pi.on("click", function() {
-    d3.event.preventDefault();
-
-    _phi.classed("active", false);
-    _pi.classed("active", true);
-    _e.classed("active", false);
-
-    numbers.setSubject(Numbers.PI, function() {
-      stageState.subjectValue = numbers.subjectValue();
-    });
-  });
-
-  _e.on("click", function() {
-    d3.event.preventDefault();
-
-    _phi.classed("active", false);
-    _pi.classed("active", false);
-    _e.classed("active", true);
-
-    numbers.setSubject(Numbers.E, function() {
-      stageState.subjectValue = numbers.subjectValue();
-    });
-  });
-
-  var updateDensitySlider = function(min, max, value) {
-    _densitySlider.attr({ min: min, max: max, value: value });
-    _densitySlider[0][0].value = value;
-  }
-
-  var updateColsSlider = function(min, max, value) {
-    _colsSlider.attr({ min: min, max: max, value: value });
-    _colsSlider[0][0].value = value;
-  }
-
-  var densityValueChanged =  function() {
+  stageState.controls.density.on('change:value', function() {
     stageState.densityValue = +this.value;
 
-    minCols = Math.max(Math.floor(stageState.widthRadiusToCols(stageState.minWidth, stageState.dRadius)), 1);
-    maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
-    updateColsSlider(minCols, maxCols, stageState.densityValue);
-  };
+    var minCols = Math.max(Math.floor(stageState.widthRadiusToCols(stageState.minWidth, stageState.dRadius)), 1);
+    var maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
 
-  var columnsValueChanged = function() {
+    stageState.controls.columns.set({
+      min: minCols, max: maxCols, value: stageState.densityValue
+    });
+
+    stageState.trigger('change:subjectValue');
+  });
+
+  stageState.controls.columns.on('change:value', function() {
     var v = +this.value;
 
     stageState.set({
       densityValue: v,
-      width: stageState.radiusDensityToWidth(stageState.dRadius,  v)
+      width: stageState.radiusDensityToWidth(stageState.dRadius, v)
     });
 
-    maxDensity = stageState.widthRadiusToCols(stageState.width, stageState.minRadius);
-    updateDensitySlider(minDensity, maxDensity, v);
-  };
+    var maxDensity = Math.floor(stageState.widthRadiusToCols(stageState.width,
+                                                             stageState.minRadius));
+
+    stageState.controls.density.set({
+      min: 1, max: maxDensity, value: v
+    });
+  });
+
+  stageState.on('change:subjectValue change:displayMode', function() {
+    stageView.render();
+  })
+
+  var controlsView = new ControlsView({
+    model: stageState.controls,
+    el: controlsEl,
+  });
 
   //----------------------------------------------------------------------------
 
-  stageState.trigger('change'); // render
-
-  maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
-  minCols = stageState.densityValue;
-
-  maxDensity = stageState.widthRadiusToCols(stageState.minWidth, stageState.minRadius);
-
-  updateDensitySlider(minDensity, maxDensity, stageState.densityValue);
-  updateColsSlider(minCols, maxCols, minCols);
-
-  _densitySlider.on("change", densityValueChanged);
-  _densitySlider.on("input", densityValueChanged);
-
-  _colsSlider.on("change", columnsValueChanged);
-  _colsSlider.on("input", columnsValueChanged);
+  stageState.controls.columns.min = stageState.densityValue;
+  stageState.controls.columns.max =
+    Math.floor(stageState.widthRadiusToCols(window.innerWidth,
+                                            stageState.dRadius));
 
   //----------------------------------------------------------------------------
 
