@@ -1,0 +1,126 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Interactive visualisation of &pi; and friends</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="stylesheet" href="styles.css">
+
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="favicomatic/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="favicomatic/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="favicomatic/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="favicomatic/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="favicomatic/apple-touch-icon-60x60.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="favicomatic/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="favicomatic/apple-touch-icon-76x76.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="favicomatic/apple-touch-icon-152x152.png" />
+
+    <link rel="icon" type="image/png" href="favicomatic/favicon-196x196.png" sizes="196x196" />
+    <link rel="icon" type="image/png" href="favicomatic/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="favicomatic/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favicomatic/favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="favicomatic/favicon-128.png" sizes="128x128" />
+
+    <meta name="application-name" content="winski"/>
+
+    <meta name="msapplication-TileColor" content="#FFFFFF" />
+    <meta name="msapplication-TileImage" content="favicomatic/mstile-144x144.png" />
+    <meta name="msapplication-square70x70logo" content="favicomatic/mstile-70x70.png" />
+    <meta name="msapplication-square150x150logo" content="favicomatic/mstile-150x150.png" />
+    <meta name="msapplication-wide310x150logo" content="favicomatic/mstile-310x150.png" />
+    <meta name="msapplication-square310x310logo" content="favicomatic/mstile-310x310.png" />
+  </head>
+  <body>
+    <div class='wrap'>
+      <header>
+        <div id='dropdown'>
+          <input id="dropdown-check" type="checkbox" name="toggle" value="checked">
+
+          <div id='dropdown-drawer'>
+            <div id='dropdown-controls' class="flex">
+              <a id="phi-link" href="#phi" title="Phi" class="subject">&phi;</a>
+              <a id="pi-link" href="#pi" title="Pi" class="subject active">&pi;</a>
+              <a id="e-link" href="#e" title="Euler's number" class="subject">e</a>
+            
+              <label for="density-slider">Density</label>
+              <label for="columns-slider">Columns</label>
+              <div>Digits</div>
+            
+              <input id="density-slider" type="range">
+              <input id="columns-slider" type="range">
+            
+              <div id="digits-radio" class="flex">
+                <input id="digit-1k" type="radio" name="digits" value="3" checked="checked">
+                <label for="digit-1k">10<sup>3</sup></label>
+                <input id="digit-10k" type="radio" name="digits" value="4">
+                <label for="digit-10k">10<sup>4</sup></label>
+                <input id="digit-100k" type="radio" name="digits" value="5">
+                <label for="digit-100k">10<sup>5</sup></label>
+                <input id="digit-1m" type="radio" name="digits" value="6">
+                <label for="digit-1m">10<sup>6</sup></label>
+              </div>
+            </div>
+          </div>
+
+          <label id="dropdown-label" for="dropdown-check">
+            &#65086;
+          </label>
+        </div>
+
+      </header>
+    </div>
+
+    <svg id='stage' width="768"></svg>
+
+    <div class='wrap'>
+      <footer>
+        <p class="number-colors">
+          <span class="color-0">0</span>
+          <span class="color-1">1</span>
+          <span class="color-2">2</span>
+          <span class="color-3">3</span>
+          <span class="color-4">4</span>
+          <span class="color-5">5</span>
+          <span class="color-6">6</span>
+          <span class="color-7">7</span>
+          <span class="color-8">8</span>
+          <span class="color-9">9</span>
+        </p>
+
+        <p>This is an interactive data visualisation of the number &pi;. It's a
+        derivative work based on the 2013 &pi;-day poster by <a
+        href="https://twitter.com/MKrzywinski">Martin Krzywinski</a>, <a
+      href='http://mkweb.bcgsc.ca/pi/piday'>http://mkweb.bcgsc.ca/pi/piday</a>.</p>
+
+        <p>Each digit in the numbers are represented by a circle of a different
+        color. Each circle contains a smaller circle colored according to the
+        following digit. The colors are assigned as seen in the list above.</p>
+
+        <p>Tap or click on the number symbols in the top to choose a subject.
+        Drag the sliders to change the density of the circles or the number of
+        columns. Tap or click the image to toggle connecting lines.</p>
+
+        <p>Source code available on <a
+          href="https://github.com/rhardih/winski"
+          title="GitHub">GitHub</a>.</p>
+      </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+			ga('create', 'UA-42470333-3', 'auto');
+			ga('send', 'pageview');
+		</script>
+    <script src="js/app.bundle.js"></script>
+  </body>
+</html>
+
