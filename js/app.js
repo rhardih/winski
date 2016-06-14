@@ -25,6 +25,21 @@ var SliderState = State.extend({
   }
 });
 
+var RowsState = SliderState.extend({
+  props: {
+    subject: 'state'
+  },
+
+  derived: {
+    max: {
+      deps: ['subject.value'],
+      fn: function() {
+        return Math.ceil(this.subject.value.length / 20); // TODO: columns
+      }
+    }
+  }
+});
+
 var SubjectState = State.extend({
   props: {
     name: ['string', true, ''],
@@ -49,6 +64,13 @@ var SubjectState = State.extend({
   e: function() {
     this.name = Numbers.E;
     this.numbers.setSubject(Numbers.E, this.updateValue.bind(this));
+  },
+
+  setDigits: function(d, cb) {
+    this.numbers.setDigits(d, (function() {
+      this.updateValue();
+      cb();
+    }).bind(this));
   }
 });
 
@@ -60,7 +82,7 @@ var ControlsState = State.extend({
   children: {
     density: SliderState,
     columns: SliderState,
-    rows: SliderState
+    rows: RowsState
   }
 });
 
@@ -137,7 +159,11 @@ ready(function() {
     controls: {
       density: { min: 1, max: 29, value: 20 },
       columns: { min: 1, max: 29, value: 20 },
-      rows: { min: 1, max: 50, value: 50 },
+      rows: {
+        min: 1,
+        value: 50,
+        subject: subjectState
+      },
       subject: subjectState
     },
     subject: subjectState
@@ -178,8 +204,8 @@ ready(function() {
   });
 
   stageState.controls.on('change:digits', function() {
-    numbers.setDigits(this.digits, function() {
-      stageState.controls.subject.value = numbers.subjectValue();
+    stageState.subject.setDigits(this.digits, function() {
+      stageState.controls.rows.value = stageState.controls.rows.max;
     });
   });
 
