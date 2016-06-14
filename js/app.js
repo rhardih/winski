@@ -108,7 +108,6 @@ var StageState = State.extend({
     controls: ControlsState
   },
 
-  minWidth: 768,
   minRadius: 0.5,
 
   derived: {
@@ -164,7 +163,11 @@ ready(function() {
     value: numbers.subjectValue()
   });
 
-  var columnsState = new SliderState({ min: 1, max: 29, value: 20 });
+  var columnsState = new SliderState({
+    min: 1,
+    max: 29,
+    value: 20
+  });
 
   var stageState = new StageState({
     controls: {
@@ -189,11 +192,10 @@ ready(function() {
   stageState.controls.density.on('change:value', function() {
     stageState.densityValue = +this.value;
 
-    var minCols = Math.max(Math.floor(stageState.widthRadiusToCols(stageState.minWidth, stageState.dRadius)), 1);
     var maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
 
     columnsState.set({
-      min: minCols, max: maxCols, value: stageState.densityValue
+      min: 1, max: maxCols, value: stageState.densityValue
     }, { silent: true });
 
     stageState.subject.trigger('change:value');
@@ -240,7 +242,6 @@ ready(function() {
 
   //----------------------------------------------------------------------------
 
-  columnsState.min = stageState.densityValue;
   columnsState.max =
     Math.floor(stageState.widthRadiusToCols(window.innerWidth,
                                             stageState.dRadius));
