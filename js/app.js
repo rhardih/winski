@@ -28,13 +28,32 @@ var SliderState = State.extend({
 var SubjectState = State.extend({
   props: {
     name: ['string', true, ''],
-    value: ['string', true, '']
+    value: ['string', true, ''],
+    numbers: ['object', true, function() { return new Numbers(); }]
+  },
+
+  updateValue: function() {
+    this.value = this.numbers.subjectValue()
+  },
+
+  pi: function() {
+    this.name = Numbers.PI;
+    this.numbers.setSubject(Numbers.PI, this.updateValue.bind(this));
+  },
+
+  phi: function() {
+    this.name = Numbers.PHI;
+    this.numbers.setSubject(Numbers.PHI, this.updateValue.bind(this));
+  },
+
+  e: function() {
+    this.name = Numbers.E;
+    this.numbers.setSubject(Numbers.E, this.updateValue.bind(this));
   }
 });
 
 var ControlsState = State.extend({
   props: {
-    subjectName: ['string', true, Numbers.PI],
     digits: ['number', true, 3],
     subject: 'state'
   },
@@ -104,7 +123,7 @@ var StageState = State.extend({
 ready(function() {
   var numbers = new Numbers();
 
-  var svg = d3.select("svg");
+  var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
 
   //----------------------------------------------------------------------------
@@ -126,14 +145,8 @@ ready(function() {
 
   var stageView = new StageView({
     model: stageState,
-    el: svg[0][0]
+    el: svgEl
   });
-
-  stageState.controls.on('change:subjectName', function(e) {
-    numbers.setSubject(this.subjectName, function() {
-      subjectState.value = numbers.subjectValue()
-    });
-  })
 
   stageState.controls.density.on('change:value', function() {
     stageState.densityValue = +this.value;

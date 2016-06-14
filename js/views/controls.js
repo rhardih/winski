@@ -41,12 +41,13 @@ var ControlsView = View.extend({
     "click #phi-link": "selectSubject",
     "click #pi-link": "selectSubject",
     "click #e-link": "selectSubject",
+
     'click #digits-radio input': 'onDigitsClick',
     'change #digits-radio input': 'onDigitsChange'
   },
 
   bindings: {
-    "model.subjectName": {
+    "model.subject.name": {
       type: "switchClass",
       name: "active",
       cases: {
@@ -83,13 +84,13 @@ var ControlsView = View.extend({
 
     switch (this, e.target.hash) {
       case '#phi':
-				this.model.subjectName = Numbers.PHI;
+        this.model.subject.phi();
         break;
       case '#pi':
-				this.model.subjectName = Numbers.PI;
+        this.model.subject.pi();
 				break;
 			case '#e':
-				this.model.subjectName = Numbers.E;
+        this.model.subject.e();
 				break;
       default:
         console.log('selectSubject: error');
