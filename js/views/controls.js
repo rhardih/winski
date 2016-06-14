@@ -56,6 +56,18 @@ var ControlsView = View.extend({
         "e": "#e-link"
       }
     },
+    "model.density.value": {
+      type: "innerHTML",
+      selector: "output[for=density-slider]"
+    },
+    "model.columns.value": {
+      type: "innerHTML",
+      selector: "output[for=columns-slider]"
+    },
+    "model.rows.value": {
+      type: "innerHTML",
+      selector: "output[for=rows-slider]"
+    }
   },
 
   subviews: {
