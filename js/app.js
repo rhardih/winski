@@ -27,14 +27,15 @@ var SliderState = State.extend({
 
 var RowsState = SliderState.extend({
   props: {
-    subject: 'state'
+    subject: 'state',
+    columns: 'state'
   },
 
   derived: {
     max: {
-      deps: ['subject.value'],
+      deps: ['subject.value', 'columns.value'],
       fn: function() {
-        return Math.ceil(this.subject.value.length / 20); // TODO: columns
+        return Math.ceil(this.subject.value.length / this.columns.value);
       }
     }
   }
@@ -77,11 +78,11 @@ var SubjectState = State.extend({
 var ControlsState = State.extend({
   props: {
     digits: ['number', true, 3],
-    subject: 'state'
+    subject: 'state',
+    columns: 'state'
   },
   children: {
     density: SliderState,
-    columns: SliderState,
     rows: RowsState
   }
 });
@@ -155,14 +156,17 @@ ready(function() {
     value: numbers.subjectValue()
   });
 
+  var columnsState = new SliderState({ min: 1, max: 29, value: 20 });
+
   var stageState = new StageState({
     controls: {
       density: { min: 1, max: 29, value: 20 },
-      columns: { min: 1, max: 29, value: 20 },
+      columns: columnsState,
       rows: {
         min: 1,
         value: 50,
-        subject: subjectState
+        subject: subjectState,
+        columns: columnsState
       },
       subject: subjectState
     },
@@ -180,14 +184,14 @@ ready(function() {
     var minCols = Math.max(Math.floor(stageState.widthRadiusToCols(stageState.minWidth, stageState.dRadius)), 1);
     var maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
 
-    stageState.controls.columns.set({
+    columnsState.set({
       min: minCols, max: maxCols, value: stageState.densityValue
     });
 
     stageState.subject.trigger('change:value');
   });
 
-  stageState.controls.columns.on('change:value', function() {
+  columnsState.on('change:value', function() {
     var v = +this.value;
 
     stageState.set({
@@ -228,8 +232,8 @@ ready(function() {
 
   //----------------------------------------------------------------------------
 
-  stageState.controls.columns.min = stageState.densityValue;
-  stageState.controls.columns.max =
+  columnsState.min = stageState.densityValue;
+  columnsState.max =
     Math.floor(stageState.widthRadiusToCols(window.innerWidth,
                                             stageState.dRadius));
 });
