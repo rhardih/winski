@@ -25,14 +25,23 @@ var SliderState = State.extend({
   }
 });
 
+var SubjectState = State.extend({
+  props: {
+    name: ['string', true, ''],
+    value: ['string', true, '']
+  }
+});
+
 var ControlsState = State.extend({
   props: {
     subjectName: ['string', true, Numbers.PI],
-    digits: ['number', true, 3]
+    digits: ['number', true, 3],
+    subject: 'state'
   },
   children: {
     density: SliderState,
-    columns: SliderState
+    columns: SliderState,
+    rows: SliderState
   }
 });
 
@@ -40,9 +49,9 @@ var StageState = State.extend({
   props: {
     width: ['number', true, 768],
     displayMode: ['number', true, 0],
-    subjectValue: ['string', true, ''],
     densityValue: ['number', true, 20],
-    spacing: ['number', true, 25]
+    spacing: ['number', true, 25],
+    subject: 'state'
   },
 
   children: {
@@ -64,6 +73,13 @@ var StageState = State.extend({
         var tmp = (this.width - (this.densityValue * this.spacing) -
                   this.spacing) / (2 * this.densityValue);
         return tmp;
+      }
+    },
+    limit :{
+      deps: ['subject.value', 'controls.rows.value', 'controls.columns.value'],
+      fn: function() {
+        var tmp = this.controls.rows.value * this.controls.columns.value;
+        return Math.min(this.subject.value.length, tmp);
       }
     }
   },
@@ -93,12 +109,19 @@ ready(function() {
 
   //----------------------------------------------------------------------------
 
+  var subjectState = new SubjectState({
+    name: Numbers.PI,
+    value: numbers.subjectValue()
+  });
+
   var stageState = new StageState({
-    subjectValue: numbers.subjectValue(),
     controls: {
       density: { min: 1, max: 29, value: 20 },
-      columns: { min: 1, max: 29, value: 20 }
-    }
+      columns: { min: 1, max: 29, value: 20 },
+      rows: { min: 1, max: 50, value: 50 },
+      subject: subjectState
+    },
+    subject: subjectState
   });
 
   var stageView = new StageView({
@@ -108,7 +131,7 @@ ready(function() {
 
   stageState.controls.on('change:subjectName', function(e) {
     numbers.setSubject(this.subjectName, function() {
-      stageState.subjectValue = numbers.subjectValue();
+      subjectState.value = numbers.subjectValue()
     });
   })
 
@@ -122,7 +145,7 @@ ready(function() {
       min: minCols, max: maxCols, value: stageState.densityValue
     });
 
-    stageState.trigger('change:subjectValue');
+    stageState.subject.trigger('change:value');
   });
 
   stageState.controls.columns.on('change:value', function() {
@@ -143,13 +166,21 @@ ready(function() {
 
   stageState.controls.on('change:digits', function() {
     numbers.setDigits(this.digits, function() {
-      stageState.subjectValue = numbers.subjectValue();
+      stageState.controls.subject.value = numbers.subjectValue();
     });
   });
 
-  stageState.on('change:subjectValue change:displayMode', function() {
+  stageState.controls.on('change:rows', function() {
+    stageView.render();
+  });
+
+  stageState.on('change:displayMode change:limit', function() {
     stageView.render();
   })
+
+  stageState.subject.on('change:value', function() {
+    stageView.render();
+  });
 
   var controlsView = new ControlsView({
     model: stageState.controls,

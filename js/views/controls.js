@@ -69,6 +69,12 @@ var ControlsView = View.extend({
       prepareView: function(el) {
         return new SliderView({ el: el, model: this.model.columns });
       }
+    },
+    rowsSlider: {
+      selector: '#rows-slider',
+      prepareView: function(el) {
+        return new SliderView({ el: el, model: this.model.rows });
+      }
     }
   },
 

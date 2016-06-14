@@ -42,10 +42,10 @@ var StageView = View.extend({
 
     var cols = this.model.densityValue;
     var displayMode = this.model.displayMode;
-    var subject = this.model.subjectValue;
+    var subject = this.model.subject.value;
 
     var svg = this.svg;
-    var limit = subject.length;
+    var limit = this.model.limit;
     var width = svg.attr("width");
     var heigth;
     var strokeWidth;
