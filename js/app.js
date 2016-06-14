@@ -28,6 +28,7 @@ var SliderState = State.extend({
 var ControlsState = State.extend({
   props: {
     subjectName: ['string', true, Numbers.PI],
+    digits: ['number', true, 3]
   },
   children: {
     density: SliderState,
@@ -140,6 +141,12 @@ ready(function() {
     });
   });
 
+  stageState.controls.on('change:digits', function() {
+    numbers.setDigits(this.digits, function() {
+      stageState.subjectValue = numbers.subjectValue();
+    });
+  });
+
   stageState.on('change:subjectValue change:displayMode', function() {
     stageView.render();
   })
@@ -155,35 +162,4 @@ ready(function() {
   stageState.controls.columns.max =
     Math.floor(stageState.widthRadiusToCols(window.innerWidth,
                                             stageState.dRadius));
-
-  //----------------------------------------------------------------------------
-
-  var digits = d3.selectAll('#digits-radio input');
-  var alreadyWarned = false;
-
-  var onDigitsChange = function() {
-    var value = +this.value;
-
-    numbers.setDigits(+this.value, function() {
-      stageState.subjectValue = numbers.subjectValue();
-    });
-  };
-
-  digits.on('click', function() {
-    var value = +this.value;
-    var warning = 'Displaying 100k digits or more, can be very resource ' +
-      'intensive, even on a powerfull computer. Are you sure you would like ' +
-      'to proceed?';
-
-    if (value > 4 && !alreadyWarned) {
-      if (confirm(warning)) {
-        alreadyWarned = true;
-      } else {
-        d3.event.preventDefault();
-        return false;
-      }
-    }
-  });
-
-  digits.on('change', onDigitsChange);
 });
