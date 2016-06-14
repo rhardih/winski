@@ -29,6 +29,7 @@ var SliderState = State.extend({
 var ControlsState = State.extend({
   props: {
     subjectName: ['string', true, Numbers.PI],
+    digits: ['number', true, 3]
   },
   children: {
     density: SliderState,
@@ -141,6 +142,12 @@ ready(function() {
     });
   });
 
+  stageState.controls.on('change:digits', function() {
+    numbers.setDigits(this.digits, function() {
+      stageState.subjectValue = numbers.subjectValue();
+    });
+  });
+
   stageState.on('change:subjectValue change:displayMode', function() {
     stageView.render();
   })
@@ -156,37 +163,6 @@ ready(function() {
   stageState.controls.columns.max =
     Math.floor(stageState.widthRadiusToCols(window.innerWidth,
                                             stageState.dRadius));
-
-  //----------------------------------------------------------------------------
-
-  var digits = d3.selectAll('#digits-radio input');
-  var alreadyWarned = false;
-
-  var onDigitsChange = function() {
-    var value = +this.value;
-
-    numbers.setDigits(+this.value, function() {
-      stageState.subjectValue = numbers.subjectValue();
-    });
-  };
-
-  digits.on('click', function() {
-    var value = +this.value;
-    var warning = 'Displaying 100k digits or more, can be very resource ' +
-      'intensive, even on a powerfull computer. Are you sure you would like ' +
-      'to proceed?';
-
-    if (value > 4 && !alreadyWarned) {
-      if (confirm(warning)) {
-        alreadyWarned = true;
-      } else {
-        d3.event.preventDefault();
-        return false;
-      }
-    }
-  });
-
-  digits.on('change', onDigitsChange);
 });
 },{}],2:[function(require,module,exports){
 var Numbers = function() {
@@ -311,11 +287,14 @@ var ControlsView = View.extend({
   template: require(3),
 
   autoRender: true,
+  alreadyWarned: false,
 
   events: {
     "click #phi-link": "selectSubject",
     "click #pi-link": "selectSubject",
-    "click #e-link": "selectSubject"
+    "click #e-link": "selectSubject",
+    'click #digits-radio input': 'onDigitsClick',
+    'change #digits-radio input': 'onDigitsChange'
   },
 
   bindings: {
@@ -361,6 +340,26 @@ var ControlsView = View.extend({
       default:
         console.log('selectSubject: error');
     }
+  },
+
+  onDigitsClick: function(e) {
+    var value = +e.target.value;
+    var warning = 'Displaying 100k digits or more, can be very resource ' +
+      'intensive, even on a powerfull computer. Are you sure you would like ' +
+      'to proceed?';
+
+    if (value > 4 && !this.alreadyWarned) {
+      if (confirm(warning)) {
+        this.alreadyWarned = true;
+      } else {
+        e.preventDefault();
+        return false;
+      }
+    }
+  },
+
+  onDigitsChange: function(e) {
+    this.model.digits = +e.target.value;
   }
 });
 
