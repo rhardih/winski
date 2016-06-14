@@ -26,6 +26,14 @@ var SliderState = State.extend({
 });
 
 var RowsState = SliderState.extend({
+  initialize: function() {
+    this.on('change:columns.value', function() {
+      if (this.value > this.max) {
+        this.value = this.max;
+      }
+    });
+  },
+
   props: {
     subject: 'state',
     columns: 'state'
@@ -186,7 +194,7 @@ ready(function() {
 
     columnsState.set({
       min: minCols, max: maxCols, value: stageState.densityValue
-    });
+    }, { silent: true });
 
     stageState.subject.trigger('change:value');
   });
