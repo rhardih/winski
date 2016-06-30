@@ -68,6 +68,7 @@ $aqua-forest: #6a6;
 // Globals
 
 $border-radius: 5px;
+$animation-duration: 150ms;
 
 // Imports
 
@@ -145,8 +146,34 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
 
 #dropdown-drawer {
   max-height: 0;
-  transition: max-height 0.15s ease-out;
+  transition: max-height $animation-duration ease-out;
   overflow: hidden;
+}
+
+#dropdown-check {
+  display: none;
+
+  &:checked ~ #dropdown-drawer {
+    max-height: 500px;
+  }
+
+  &:checked ~ #dropdown-label:after {
+    content: "︽";
+  }
+}
+
+#dropdown-label {
+  @include cursor-pointer;
+  @include noselect;
+
+  font-size: 3em;
+  display: block;
+
+  &:after {
+    display: block;
+    content: '︾';
+    margin: 1rem;
+  }
 }
 
 #dropdown-controls {
@@ -228,28 +255,6 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
       padding: 0 0.5rem;
     }
   }
-}
-
-input[type=checkbox]:checked ~ #dropdown-drawer {
-  max-height: 500px;
-  transition: max-height 0.25s ease-in;
-}
-
-#dropdown-label {
-  display: block;
-  margin-top: 1rem;
-}
-
-#dropdown-check {
-  display: none;
-}
-
-#dropdown-label {
-  @include cursor-pointer;
-  @include noselect;
-
-  font-size: 3em;
-
 }
 
 #stage {
