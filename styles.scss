@@ -51,6 +51,13 @@
   flex-flow: $direction $wrap;
 }
 
+@mixin flex-grow($v: 1) {
+  -webkit-box-flex: $v;
+  -webkit-flex-grow: $v;
+  -ms-flex-positive: $v;
+  flex-grow: $v;
+}
+
 // Colors
 
 $black: #000;
@@ -173,6 +180,36 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
     }
   }
 
+  & > .label-input-wrap {
+    @include flex-display;
+
+    label {
+      @include flex-grow(1);
+    }
+
+    input[type=text] {
+      &:focus {
+        outline: none;
+        box-shadow: inset 0px 0px 4px $willow-grove;
+      }
+
+      text-align: right;
+
+      color: $willow-grove;
+
+      background: $mine-shaft;
+      font-size: 1rem;
+      padding: 0 0.5rem;
+
+      border: 0;
+      border-radius: 3px;
+
+      -webkit-transition: 0.1s ease-out;
+      transition: 0.1s ease-out;
+    }
+
+  }
+
   #digits-radio {
     @include noselect;
     @include flex-justify;
@@ -220,5 +257,5 @@ input[type=checkbox]:checked ~ #dropdown-drawer {
   @include noselect;
 
   display: block;
-  margin: -1em auto;
+  margin: 0 auto;
 }

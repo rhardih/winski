@@ -4,7 +4,7 @@ var Numbers = require('../numbers.js');
 
 //------------------------------------------------------------------------------
 
-var SliderView = View.extend({
+var InputView = View.extend({
   template: function() { return this.el.outerHTML },
 
   events: {
@@ -21,7 +21,7 @@ var SliderView = View.extend({
       type: 'attribute',
       name: 'max'
     },
-    'model.value': {
+    'model.boundedValue': {
       type: 'value',
     },
   },
@@ -55,38 +55,56 @@ var ControlsView = View.extend({
         "pi": "#pi-link",
         "e": "#e-link"
       }
-    },
-    "model.density.value": {
-      type: "innerHTML",
-      selector: "output[for=density-slider]"
-    },
-    "model.columns.value": {
-      type: "innerHTML",
-      selector: "output[for=columns-slider]"
-    },
-    "model.rows.value": {
-      type: "innerHTML",
-      selector: "output[for=rows-slider]"
     }
   },
 
   subviews: {
-    densitySlider: {
-      selector: '#density-slider',
+    rowsLabelInput: {
+      selector: "#rows-label-input input",
       prepareView: function(el) {
-        return new SliderView({ el: el, model: this.model.density });
+        return new InputView({ el: el, model: this.model.rows });
+      }
+    },
+    columnsLabelInput: {
+      selector: "#columns-label-input input",
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.columns });
+      }
+    },
+    radiusLabelInput: {
+      selector: "#radius-label-input input",
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.radius });
+      }
+    },
+    spacingLabelInput: {
+      selector: "#spacing-label-input input",
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.spacing });
       }
     },
     columnsSlider: {
       selector: '#columns-slider',
       prepareView: function(el) {
-        return new SliderView({ el: el, model: this.model.columns });
+        return new InputView({ el: el, model: this.model.columns });
       }
     },
     rowsSlider: {
       selector: '#rows-slider',
       prepareView: function(el) {
-        return new SliderView({ el: el, model: this.model.rows });
+        return new InputView({ el: el, model: this.model.rows });
+      }
+    },
+    spacingSlider: {
+      selector: '#spacing-slider',
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.spacing });
+      }
+    },
+    radiusSlider: {
+      selector: '#radius-slider',
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.radius });
       }
     }
   },
