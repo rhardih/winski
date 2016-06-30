@@ -3,7 +3,6 @@ $thumb-height: 14px;
 $thumb-width: 39px;
 
 $track-height: 10px;
-$track-radius: 5px;
 
 @mixin track() {
   width: 100%;
@@ -35,7 +34,7 @@ $track-radius: 5px;
   &::-webkit-slider-runnable-track {
     @include track();
     background: $mine-shaft;
-    border-radius: $track-radius;
+    border-radius: $border-radius;
   }
 
   &::-webkit-slider-thumb {
@@ -47,7 +46,7 @@ $track-radius: 5px;
   &::-moz-range-track {
     @include track();
     background: $mine-shaft;
-    border-radius: $track-radius;
+    border-radius: $border-radius;
   }
 
   &::-moz-range-thumb {
@@ -62,12 +61,12 @@ $track-radius: 5px;
 
   &::-ms-fill-lower {
     background: $mine-shaft;
-    border-radius: $track-radius * 2;
+    border-radius: $border-radius * 2;
   }
 
   &::-ms-fill-upper {
     background: $mine-shaft;
-    border-radius: $track-radius * 2;
+    border-radius: $border-radius * 2;
   }
 
   &::-ms-thumb {
