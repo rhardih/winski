@@ -273,7 +273,7 @@ ready(function() {
   });
 
   controlsState.on('change:digits', function() {
-    stageState.subject.setDigits(this.digits, function() {
+    subjectState.setDigits(this.digits, function() {
       rowsState.value = rowsState.max;
     });
   });
