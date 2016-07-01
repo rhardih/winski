@@ -1,7 +1,7 @@
 var State = require('ampersand-state');
 var View = require('ampersand-view');
 
-var Numbers = require('./numbers.js');
+var SubjectState = require('./states/subject.js');
 var StageView = require('./views/stage.js');
 var ControlsView = require('./views/controls.js');
 
@@ -137,40 +137,6 @@ var SpacingState = SliderState.extend({
   }
 });
 
-var SubjectState = State.extend({
-  props: {
-    name: ['string', true, ''],
-    value: ['string', true, ''],
-    numbers: ['object', true, function() { return new Numbers(); }]
-  },
-
-  updateValue: function() {
-    this.value = this.numbers.subjectValue()
-  },
-
-  pi: function() {
-    this.name = Numbers.PI;
-    this.numbers.setSubject(Numbers.PI, this.updateValue.bind(this));
-  },
-
-  phi: function() {
-    this.name = Numbers.PHI;
-    this.numbers.setSubject(Numbers.PHI, this.updateValue.bind(this));
-  },
-
-  e: function() {
-    this.name = Numbers.E;
-    this.numbers.setSubject(Numbers.E, this.updateValue.bind(this));
-  },
-
-  setDigits: function(d, cb) {
-    this.numbers.setDigits(d, (function() {
-      this.updateValue();
-      cb();
-    }).bind(this));
-  }
-});
-
 var ControlsState = State.extend({
   props: {
     digits: ['number', true, 3],
@@ -237,18 +203,13 @@ var SharedState = State.extend({
 //------------------------------------------------------------------------------
 
 ready(function() {
-  var numbers = new Numbers();
-
   var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
 
   //----------------------------------------------------------------------------
 
   var sharedState = new SharedState();
-  var subjectState = new SubjectState({
-    name: Numbers.PI,
-    value: numbers.subjectValue()
-  });
+  var subjectState = new SubjectState();
 
   var rowsState = new RowsState({ shared: sharedState, subject: subjectState });
   var columnsState = new ColumnsState({ shared: sharedState });
@@ -312,7 +273,7 @@ ready(function() {
   });
 
   controlsState.on('change:digits', function() {
-    stageState.subject.setDigits(this.digits, function() {
+    subjectState.setDigits(this.digits, function() {
       rowsState.value = rowsState.max;
     });
   });

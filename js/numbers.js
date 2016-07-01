@@ -34,6 +34,9 @@ var Numbers = function() {
     var that = this;
 
     if (n < 3 || n > 6) return;
+
+    this.digits = n;
+
     if (n > currentMax[this.subject]) {
       url = [
         "data/",
@@ -52,8 +55,6 @@ var Numbers = function() {
     } else {
       done();
     }
-
-    this.digits = n;
   }
 
   this.subjectValue = function() {
