@@ -206,7 +206,7 @@ var StageState = State.extend({
       }
     },
     height: {
-      deps: ['shared.columns', 'shared.radius', 'shared.spacing'],
+      deps: ['shared.rows', 'shared.radius', 'shared.spacing'],
       fn: function() {
         return this.shared.rows * 2 * this.shared.radius +
           this.shared.spacing * (this.shared.rows - 1);
