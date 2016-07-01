@@ -3,13 +3,18 @@
   <a id="pi-link" href="#pi" title="Pi" class="subject active">&pi;</a>
   <a id="e-link" href="#e" title="Euler's number" class="subject">e</a>
 
-  <label for="density-slider">Density</label>
-  <label for="columns-slider">Columns</label>
+  <div id="rows-label-input" class="label-input-wrap" title="Number of rows shown">
+    <label for="rows-slider">Rows</label>
+    <input type="text" size="6" name="rows-value" tabindex="1"></input>
+  </div>
+  <div id="columns-label-input" class="label-input-wrap" title="Number of columns shown">
+    <label for="columns-slider">Columns</label>
+    <input type="text" size="6" name="columns-value" tabindex="2"></input>
+  </div>
   <div>Digits</div>
 
-  <input id="density-slider" type="range">
+  <input id="rows-slider" type="range">
   <input id="columns-slider" type="range">
-
   <div id="digits-radio" class="flex">
     <input id="digit-1k" type="radio" name="digits" value="3" checked="checked">
     <label for="digit-1k">10<sup>3</sup></label>
@@ -20,4 +25,18 @@
     <input id="digit-1m" type="radio" name="digits" value="6">
     <label for="digit-1m">10<sup>6</sup></label>
   </div>
+
+  <div id="radius-label-input" class="label-input-wrap" title="Radius of each circle">
+    <label for="radius-slider">Radius</label>
+    <input type="text" size="6" name="radius-value" tabindex="3"></input>
+  </div>
+  <div id="spacing-label-input" class="label-input-wrap" title="Spacing between each circle">
+    <label for="spacing-slider">Spacing</label>
+    <input type="text" size="6" name="spacing-value" tabindex="4"></input>
+  </div>
+  <div>&nbsp;</div>
+
+  <input id="radius-slider" type="range">
+  <input id="spacing-slider" type="range">
+  <div>&nbsp;</div>
 </div>

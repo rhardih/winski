@@ -51,12 +51,24 @@
   flex-flow: $direction $wrap;
 }
 
+@mixin flex-grow($v: 1) {
+  -webkit-box-flex: $v;
+  -webkit-flex-grow: $v;
+  -ms-flex-positive: $v;
+  flex-grow: $v;
+}
+
 // Colors
 
 $black: #000;
 $mine-shaft: #222;
 $willow-grove: #676;
 $aqua-forest: #6a6;
+
+// Globals
+
+$border-radius: 5px;
+$animation-duration: 150ms;
 
 // Imports
 
@@ -134,8 +146,27 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
 
 #dropdown-drawer {
   max-height: 0;
-  transition: max-height 0.15s ease-out;
+  transition: max-height $animation-duration ease-out;
   overflow: hidden;
+}
+
+#dropdown-check {
+  display: none;
+
+  &:checked ~ #dropdown-drawer {
+    max-height: 500px;
+  }
+
+  &:checked ~ #dropdown-label:after {
+    content: "︽";
+  }
+}
+
+#dropdown-label {
+  @include cursor-pointer;
+  @include noselect;
+
+  // remainig styles defined inline
 }
 
 #dropdown-controls {
@@ -169,6 +200,36 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
     }
   }
 
+  & > .label-input-wrap {
+    @include flex-display;
+
+    label {
+      @include flex-grow(1);
+    }
+
+    input[type=text] {
+      &:focus {
+        outline: none;
+        box-shadow: inset 0px 0px 4px $willow-grove;
+      }
+
+      text-align: right;
+
+      color: $willow-grove;
+
+      background: $mine-shaft;
+      font-size: 1rem;
+      padding: 0 0.5rem;
+
+      border: 0;
+      border-radius: 3px;
+
+      -webkit-transition: 0.1s ease-out;
+      transition: 0.1s ease-out;
+    }
+
+  }
+
   #digits-radio {
     @include noselect;
     @include flex-justify;
@@ -189,32 +250,10 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
   }
 }
 
-input[type=checkbox]:checked ~ #dropdown-drawer {
-  max-height: 500px;
-  transition: max-height 0.25s ease-in;
-}
-
-#dropdown-label {
-  display: block;
-  margin-top: 1rem;
-}
-
-#dropdown-check {
-  display: none;
-}
-
-#dropdown-label {
-  @include cursor-pointer;
-  @include noselect;
-
-  font-size: 3em;
-
-}
-
 #stage {
   @include cursor-pointer;
   @include noselect;
 
   display: block;
-  margin: -1em auto;
+  margin: 0 auto;
 }

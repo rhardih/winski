@@ -11,6 +11,10 @@ var StageView = View.extend({
     "model.width": {
       type: "attribute",
       name: "width"
+    },
+    "model.height": {
+      type: "attribute",
+      name: "height"
     }
   },
 
@@ -40,14 +44,12 @@ var StageView = View.extend({
 
     var that = this;
 
-    var cols = this.model.densityValue;
+    var cols = this.model.shared.columns;
     var displayMode = this.model.displayMode;
-    var subject = this.model.subjectValue;
+    var subject = this.model.subject.value;
 
     var svg = this.svg;
-    var limit = subject.length;
-    var width = svg.attr("width");
-    var heigth;
+    var limit = this.model.limit;
     var strokeWidth;
     var circlesData = [];
     var linesData = [];
@@ -60,13 +62,12 @@ var StageView = View.extend({
     var firstCol, lastCol, firstRow, lastRow;
     var datum;
     var i, xIndex;
-    var radius = this.model.dRadius;
-    var padding = radius + this.model.spacing;
+    var radius = this.model.shared.radius;
     var xCoord = function(i) {
-      return padding + (i % cols) * (that.model.spacing + 2 * radius);
+      return radius + (i % cols) * (that.model.shared.spacing + 2 * radius);
     }
     var yCoord = function(i) {
-      return padding + Math.floor(i / cols) * (that.model.spacing + 2 * radius);
+      return radius + Math.floor(i / cols) * (that.model.shared.spacing + 2 * radius);
     }
     var markEqualNeigbour = function(i) {
       if (typeof circlesData[i] !== 'undefined') {
@@ -74,9 +75,6 @@ var StageView = View.extend({
       }
     };
     strokeWidth = radius / 2.5;
-
-    height = (2 * padding) + (limit / cols) * (2 * radius) + ((limit / cols) - 1) * this.model.spacing;
-    svg.attr("height", height);
 
     for (i = 0; i < limit; i++) {
       thisDigit = nextDigit;
@@ -217,29 +215,15 @@ var StageView = View.extend({
       }
     }
 
-    var colorValve = function(open, colorCode) {
-      if (displayMode === 2) {
-        if (open) {
-          return colorCode;
-        } else {
-          return '#000';
-        }
-      } else {
-        return colorCode;
-      }
-    };
-
     var circleAttr = {
       r: function(d) { return d.r },
       "stroke-width": function(d) { return d.r / 1.4 },
       "stroke": function(d) {
         return d.outerColor;
-        //return colorValve(d.hasEqualNeighbour, d.outerColor);
       },
       "clip-path": "url(#cstroke)",
       "fill": function(d) {
         return d.innerColor;
-        //return colorValve(d.hasEqualNeighbour, d.innerColor);
       }
 
     }

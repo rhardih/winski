@@ -7,12 +7,31 @@ var ControlsView = require('./views/controls.js');
 
 //------------------------------------------------------------------------------
 
-function ready(fn) {
+// Initial values
+
+var RADIUS = 7;
+var ROWS = 50;
+var COLUMNS = 20;
+var SPACING = 25;
+
+//------------------------------------------------------------------------------
+
+var ready = function(fn) {
   if (document.readyState != 'loading'){
     fn();
   } else {
     document.addEventListener('DOMContentLoaded', fn);
   }
+}
+
+var AttachToAll = function(obj, fun, prop) {
+  for(var key in obj) {
+    if(obj.hasOwnProperty(key)) {
+      obj[key][prop] = fun;
+    }
+  }
+
+  return obj;
 }
 
 //------------------------------------------------------------------------------
@@ -22,60 +41,177 @@ var SliderState = State.extend({
     min: ['number', true, 1],
     max: ['number', true, 1],
     value: ['number', true, 1],
+  },
+
+  derived: {
+    boundedValue: {
+      deps: ['min', 'max', 'value'],
+      fn: function() {
+        return Math.min(this.max, Math.max(this.min, this.value));
+      }
+    }
+  }
+});
+
+var RowsState = SliderState.extend({
+  props: {
+    shared: 'state',
+
+    value: ['number', true, ROWS],
+    subject: 'state',
+  },
+
+  derived: {
+    max: {
+      deps: ['subject.value', 'shared.columns'],
+      fn: function() {
+        return Math.ceil(this.subject.value.length / this.shared.columns);
+      }
+    }
+  }
+});
+
+var ColumnsState = SliderState.extend({
+  props: {
+    shared: 'state',
+
+    value: ['number', true, COLUMNS],
+  },
+
+  derived: {
+    max: {
+      deps: ['shared.spacing', 'shared.radius'],
+      fn: function() {
+        return Math.floor(
+          (window.innerWidth + this.shared.spacing) /
+          ((2 * this.shared.radius) + this.shared.spacing)
+        );
+      }
+    }
+  }
+});
+
+var RadiusState = SliderState.extend({
+  props: {
+    shared: 'state',
+
+    min: ['number', true, 1],
+    value: ['number', true, RADIUS]
+  },
+
+  derived: {
+    max: {
+      deps: ['shared.width', 'shared.spacing'],
+      fn: function() {
+        return (window.innerWidth - 2 * this.shared.spacing) / 2;
+      }
+    }
+  }
+});
+
+var SpacingState = SliderState.extend({
+  props: {
+    shared: 'state',
+
+    min: ['number', true, 0],
+    value: ['number', true, SPACING],
+  },
+
+  derived: {
+    max: {
+      deps: ['shared.radius', 'shared.columns'],
+      fn: function() {
+        var tmp;
+
+        if (this.shared.columns === 1) {
+          return 0;
+        } else {
+          tmp = window.innerWidth -
+            (2 * this.shared.radius * this.shared.columns);
+          tmp /= this.shared.columns - 1;
+
+          return Math.floor(Math.max(tmp, this.min));
+        }
+      }
+    }
+  }
+});
+
+var SubjectState = State.extend({
+  props: {
+    name: ['string', true, ''],
+    value: ['string', true, ''],
+    numbers: ['object', true, function() { return new Numbers(); }]
+  },
+
+  updateValue: function() {
+    this.value = this.numbers.subjectValue()
+  },
+
+  pi: function() {
+    this.name = Numbers.PI;
+    this.numbers.setSubject(Numbers.PI, this.updateValue.bind(this));
+  },
+
+  phi: function() {
+    this.name = Numbers.PHI;
+    this.numbers.setSubject(Numbers.PHI, this.updateValue.bind(this));
+  },
+
+  e: function() {
+    this.name = Numbers.E;
+    this.numbers.setSubject(Numbers.E, this.updateValue.bind(this));
+  },
+
+  setDigits: function(d, cb) {
+    this.numbers.setDigits(d, (function() {
+      this.updateValue();
+      cb();
+    }).bind(this));
   }
 });
 
 var ControlsState = State.extend({
   props: {
-    subjectName: ['string', true, Numbers.PI],
-    digits: ['number', true, 3]
-  },
-  children: {
-    density: SliderState,
-    columns: SliderState
+    digits: ['number', true, 3],
+    subject: 'state',
+    rows: 'state',
+    columns: 'state',
+    spacing: 'state',
+    radius: 'state'
   }
 });
 
 var StageState = State.extend({
   props: {
-    width: ['number', true, 768],
+    shared: 'state',
+
     displayMode: ['number', true, 0],
-    subjectValue: ['string', true, ''],
-    densityValue: ['number', true, 20],
-    spacing: ['number', true, 25]
+    subject: 'state',
   },
-
-  children: {
-    controls: ControlsState
-  },
-
-  minWidth: 768,
-  minRadius: 0.5,
 
   derived: {
-    dRadius: {
-      deps: ['width', 'densityValue', 'spacing'],
+    limit :{
+      deps: ['subject.value', 'shared.rows', 'shared.columns'],
       fn: function() {
-        // width: 2 * (spacing + radius) + (cols - 1) * (2 * radius +
-        // spacing)
-        // w = 2 * (g + r) + (c - 1) * (2 * r + g)
-        // w = c * g + 2 * c * r + g
-        // (w - (c * g) - g) / (2 * c) = r
-        var tmp = (this.width - (this.densityValue * this.spacing) -
-                  this.spacing) / (2 * this.densityValue);
-        return tmp;
+        var tmp = this.shared.rows * this.shared.columns;
+        return Math.min(this.subject.value.length, tmp);
+      }
+    },
+    width: {
+      deps: ['shared.columns', 'shared.radius', 'shared.spacing'],
+      fn: function() {
+        return this.shared.columns * 2 * this.shared.radius +
+          this.shared.spacing * (this.shared.columns - 1);
+      }
+    },
+    height: {
+      deps: ['shared.rows', 'shared.radius', 'shared.spacing'],
+      fn: function() {
+        return this.shared.rows * 2 * this.shared.radius +
+          this.shared.spacing * (this.shared.rows - 1);
       }
     }
-  },
-
-  widthRadiusToCols: function(width, radius) {
-    // w = c *(g + 2 * r) + g
-    // (w - g) / (g + 2 * r) = c
-    return (width - this.spacing) / (this.spacing + 2 * radius);
-  },
-
-  radiusDensityToWidth: function(radius, density) {
-    return density * this.spacing + 2 * density * radius + this.spacing;
   },
 
   cycleDisplayMode: function() {
@@ -83,83 +219,109 @@ var StageState = State.extend({
   }
 });
 
+var SharedState = State.extend({
+  props: AttachToAll({
+    rows: { type: 'number', required: true, default: ROWS },
+    columns: { type: 'number', required: true, default: COLUMNS },
+    radius: { type: 'number', required: true, default: RADIUS },
+    spacing: { type: 'number', required: true, default: SPACING },
+  }, function(v) {
+    if (v < 0 || isNaN(v)) {
+      return "Must be a positive number";
+    }
+
+    return false;
+  }, "test"),
+});
+
 //------------------------------------------------------------------------------
 
 ready(function() {
   var numbers = new Numbers();
 
-  var svg = d3.select("svg");
+  var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
 
   //----------------------------------------------------------------------------
 
+  var sharedState = new SharedState();
+  var subjectState = new SubjectState({
+    name: Numbers.PI,
+    value: numbers.subjectValue()
+  });
+
+  var rowsState = new RowsState({ shared: sharedState, subject: subjectState });
+  var columnsState = new ColumnsState({ shared: sharedState });
+  var radiusState = new RadiusState({ shared: sharedState });
+  var spacingState = new SpacingState({ shared: sharedState });
+
+  var controlsState = new ControlsState({
+    subject: subjectState,
+    rows: rowsState,
+    columns: columnsState,
+    spacing: spacingState,
+    radius: radiusState
+  });
+
   var stageState = new StageState({
-    subjectValue: numbers.subjectValue(),
-    controls: {
-      density: { min: 1, max: 29, value: 20 },
-      columns: { min: 1, max: 29, value: 20 }
-    }
+    shared: sharedState,
+    subject: subjectState,
+    controls: controlsState
+  });
+
+  var controlsView = new ControlsView({
+    model: controlsState,
+    el: controlsEl,
   });
 
   var stageView = new StageView({
     model: stageState,
-    el: svg[0][0]
+    el: svgEl
   });
 
-  stageState.controls.on('change:subjectName', function(e) {
-    numbers.setSubject(this.subjectName, function() {
-      stageState.subjectValue = numbers.subjectValue();
-    });
-  })
-
-  stageState.controls.density.on('change:value', function() {
-    stageState.densityValue = +this.value;
-
-    var minCols = Math.max(Math.floor(stageState.widthRadiusToCols(stageState.minWidth, stageState.dRadius)), 1);
-    var maxCols = Math.floor(stageState.widthRadiusToCols(window.innerWidth, stageState.dRadius));
-
-    stageState.controls.columns.set({
-      min: minCols, max: maxCols, value: stageState.densityValue
-    });
-
-    stageState.trigger('change:subjectValue');
+  rowsState.on('change:boundedValue', function() {
+    sharedState.rows = this.boundedValue;
   });
 
-  stageState.controls.columns.on('change:value', function() {
-    var v = +this.value;
-
-    stageState.set({
-      densityValue: v,
-      width: stageState.radiusDensityToWidth(stageState.dRadius, v)
-    });
-
-    var maxDensity = Math.floor(stageState.widthRadiusToCols(stageState.width,
-                                                             stageState.minRadius));
-
-    stageState.controls.density.set({
-      min: 1, max: maxDensity, value: v
-    });
+  columnsState.on('change:boundedValue', function() {
+    sharedState.columns = this.boundedValue;
   });
 
-  stageState.controls.on('change:digits', function() {
-    numbers.setDigits(this.digits, function() {
-      stageState.subjectValue = numbers.subjectValue();
+  radiusState.on('change:boundedValue', function() {
+    sharedState.radius = this.boundedValue;
+  });
+
+  spacingState.on('change:boundedValue', function() {
+    sharedState.spacing = this.boundedValue;
+  });
+
+  sharedState.on('change:columns', function() {
+    columnsState.value = this.columns;
+  });
+
+  sharedState.on('change:spacing', function() {
+    spacingState.value = this.spacing;
+  });
+
+  sharedState.on('change:radius', function() {
+    radiusState.value = this.radius;
+  });
+
+  sharedState.on('change', function() {
+    stageView.render();
+  });
+
+  controlsState.on('change:digits', function() {
+    stageState.subject.setDigits(this.digits, function() {
+      rowsState.value = rowsState.max;
     });
   });
 
-  stageState.on('change:subjectValue change:displayMode', function() {
+  stageState.on('change:displayMode change:limit', function() {
     stageView.render();
   })
 
-  var controlsView = new ControlsView({
-    model: stageState.controls,
-    el: controlsEl,
+  stageState.subject.on('change:value', function() {
+    stageView.render();
   });
-
-  //----------------------------------------------------------------------------
-
-  stageState.controls.columns.min = stageState.densityValue;
-  stageState.controls.columns.max =
-    Math.floor(stageState.widthRadiusToCols(window.innerWidth,
-                                            stageState.dRadius));
 });

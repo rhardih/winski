@@ -4,7 +4,7 @@ var Numbers = require('../numbers.js');
 
 //------------------------------------------------------------------------------
 
-var SliderView = View.extend({
+var InputView = View.extend({
   template: function() { return this.el.outerHTML },
 
   events: {
@@ -21,7 +21,7 @@ var SliderView = View.extend({
       type: 'attribute',
       name: 'max'
     },
-    'model.value': {
+    'model.boundedValue': {
       type: 'value',
     },
   },
@@ -41,12 +41,13 @@ var ControlsView = View.extend({
     "click #phi-link": "selectSubject",
     "click #pi-link": "selectSubject",
     "click #e-link": "selectSubject",
+
     'click #digits-radio input': 'onDigitsClick',
     'change #digits-radio input': 'onDigitsChange'
   },
 
   bindings: {
-    "model.subjectName": {
+    "model.subject.name": {
       type: "switchClass",
       name: "active",
       cases: {
@@ -54,20 +55,56 @@ var ControlsView = View.extend({
         "pi": "#pi-link",
         "e": "#e-link"
       }
-    },
+    }
   },
 
   subviews: {
-    densitySlider: {
-      selector: '#density-slider',
+    rowsLabelInput: {
+      selector: "#rows-label-input input",
       prepareView: function(el) {
-        return new SliderView({ el: el, model: this.model.density });
+        return new InputView({ el: el, model: this.model.rows });
+      }
+    },
+    columnsLabelInput: {
+      selector: "#columns-label-input input",
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.columns });
+      }
+    },
+    radiusLabelInput: {
+      selector: "#radius-label-input input",
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.radius });
+      }
+    },
+    spacingLabelInput: {
+      selector: "#spacing-label-input input",
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.spacing });
       }
     },
     columnsSlider: {
       selector: '#columns-slider',
       prepareView: function(el) {
-        return new SliderView({ el: el, model: this.model.columns });
+        return new InputView({ el: el, model: this.model.columns });
+      }
+    },
+    rowsSlider: {
+      selector: '#rows-slider',
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.rows });
+      }
+    },
+    spacingSlider: {
+      selector: '#spacing-slider',
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.spacing });
+      }
+    },
+    radiusSlider: {
+      selector: '#radius-slider',
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.radius });
       }
     }
   },
@@ -77,13 +114,13 @@ var ControlsView = View.extend({
 
     switch (this, e.target.hash) {
       case '#phi':
-				this.model.subjectName = Numbers.PHI;
+        this.model.subject.phi();
         break;
       case '#pi':
-				this.model.subjectName = Numbers.PI;
+        this.model.subject.pi();
 				break;
 			case '#e':
-				this.model.subjectName = Numbers.E;
+        this.model.subject.e();
 				break;
       default:
         console.log('selectSubject: error');
