@@ -5,9 +5,10 @@
   "main": "script.js",
   "scripts": {
     "index": "node compile_index.js > index.html",
-    "scss": "sass --watch styles.scss:styles.css --style compressed",
-    "watch": "watchify -t hbsfy js/app.js -o js/app.bundle.js --debug --verbose",
-    "build": "browserify -t hbsfy js/app.js | bundle-collapser > js/app.bundle.js",
+    "watch_scss": "sass --watch styles.scss:styles.css --style compressed",
+    "watch_js": "watchify -t hbsfy js/app.js -o js/app.bundle.js --debug --verbose",
+    "build_scss": "sass styles.scss:styles.css --style compressed",
+    "build_js": "browserify -t hbsfy js/app.js | bundle-collapser > js/app.bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

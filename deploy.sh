@@ -6,7 +6,8 @@ git checkout gh-pages
 git merge master
 
 npm run index
-npm run build
+npm run build_scss
+npm run build_js
 
 awk -F, '{$1=$1+1;print}' OFS=, VERSION > VERSION.tmp && mv VERSION{.tmp,}
 
