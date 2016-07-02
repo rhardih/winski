@@ -66,7 +66,7 @@ var RowsState = SliderState.extend({
     max: {
       deps: ['subject.value', 'shared.columns'],
       fn: function() {
-        return Math.ceil(this.subject.value.length / this.shared.columns);
+        return Math.ceil((this.subject.value.length - 1) / this.shared.columns);
       }
     }
   }
@@ -429,9 +429,10 @@ var SubjectState = State.extend({
 
   derived: {
     value: {
-      deps: ['number.value'],
+      deps: ['number.value', 'digits'],
       fn: function() {
-        return this.number.value;
+        // + 1 at the end to fill the final circle
+        return this.number.value.substring(0, Math.pow(10, this.digits) + 1);
       }
     }
   },
