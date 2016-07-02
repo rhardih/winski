@@ -1,6 +1,13 @@
 var View = require('ampersand-view');
+var NProgress = require('nprogress');
 
-var Numbers = require('../numbers.js');
+//------------------------------------------------------------------------------
+
+NProgress.configure({
+  minimum: 0.4,
+  trickleRate: 0.1,
+  trickleSpeed: 800
+});
 
 //------------------------------------------------------------------------------
 
@@ -36,6 +43,16 @@ var ControlsView = View.extend({
 
   autoRender: true,
   alreadyWarned: false,
+
+  initialize: function() {
+    this.model.subject.on('loading', function() {
+      NProgress.start();
+    });
+
+    this.model.subject.on('done', function() {
+      NProgress.done();
+    });
+  },
 
   events: {
     "click #phi-link": "selectSubject",
@@ -114,13 +131,13 @@ var ControlsView = View.extend({
 
     switch (this, e.target.hash) {
       case '#phi':
-        this.model.subject.phi();
+        this.model.subject.setPhi();
         break;
       case '#pi':
-        this.model.subject.pi();
+        this.model.subject.setPi();
 				break;
 			case '#e':
-        this.model.subject.e();
+        this.model.subject.setE();
 				break;
       default:
         console.log('selectSubject: error');
@@ -144,7 +161,9 @@ var ControlsView = View.extend({
   },
 
   onDigitsChange: function(e) {
-    this.model.digits = +e.target.value;
+    var value = +e.target.value;
+
+    this.model.subject.setDigits(value);
   }
 });
 
