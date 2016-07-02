@@ -141,9 +141,10 @@ var SubjectState = State.extend({
 
   derived: {
     value: {
-      deps: ['number.value'],
+      deps: ['number.value', 'digits'],
       fn: function() {
-        return this.number.value;
+        // + 1 at the end to fill the final circle
+        return this.number.value.substring(0, Math.pow(10, this.digits) + 1);
       }
     }
   },
