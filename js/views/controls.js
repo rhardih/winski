@@ -44,6 +44,16 @@ var ControlsView = View.extend({
   autoRender: true,
   alreadyWarned: false,
 
+  initialize: function() {
+    this.model.subject.on('loading', function() {
+      NProgress.start();
+    });
+
+    this.model.subject.on('done', function() {
+      NProgress.done();
+    });
+  },
+
   events: {
     "click #phi-link": "selectSubject",
     "click #pi-link": "selectSubject",
@@ -119,21 +129,15 @@ var ControlsView = View.extend({
   selectSubject: function(e) {
     e.preventDefault();
 
-    NProgress.start();
-
-    var done = function() {
-      NProgress.done();
-    }
-
     switch (this, e.target.hash) {
       case '#phi':
-        this.model.subject.phi(done);
+        this.model.subject.setPhi();
         break;
       case '#pi':
-        this.model.subject.pi(done);
+        this.model.subject.setPi();
 				break;
 			case '#e':
-        this.model.subject.e(done);
+        this.model.subject.setE();
 				break;
       default:
         console.log('selectSubject: error');
@@ -158,15 +162,8 @@ var ControlsView = View.extend({
 
   onDigitsChange: function(e) {
     var value = +e.target.value;
-    var that = this;
 
-    NProgress.start();
-
-    this.model.subject.setDigits(value, function() {
-      NProgress.done();
-
-      that.model.digits = value;
-    });
+    this.model.subject.setDigits(value);
   }
 });
 

@@ -272,10 +272,6 @@ ready(function() {
     stageView.render();
   });
 
-  controlsState.on('change:digits', function() {
-    rowsState.value = rowsState.max;
-  });
-
   stageState.on('change:displayMode change:limit', function() {
     stageView.render();
   })
