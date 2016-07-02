@@ -279,4 +279,8 @@ ready(function() {
   stageState.subject.on('change:value', function() {
     stageView.render();
   });
+
+  subjectState.on('done', function() {
+    rowsState.value = rowsState.max;
+  });
 });
