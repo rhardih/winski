@@ -280,6 +280,10 @@ ready(function() {
   stageState.subject.on('change:value', function() {
     stageView.render();
   });
+
+  subjectState.on('done', function() {
+    rowsState.value = rowsState.max;
+  });
 });
 },{}],2:[function(require,module,exports){
 var State = require(12);
@@ -434,8 +438,12 @@ var SubjectState = State.extend({
 
   _setNum: function(name, num) {
     this.name = name;
+    this.set({ number: num }, {
+      // Avoid triggering change value event twice, in case setting digits will
+      // also cause a a change event.
+      silent: this.digits > num.maxDigits
+    });
     num.setDigits(this.digits);
-    this.number = num;
   },
 
   setPhi: function() {
