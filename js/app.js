@@ -1,8 +1,6 @@
 var State = require('ampersand-state');
 var View = require('ampersand-view');
 
-var NProgress = require('nprogress');
-
 var SubjectState = require('./states/subject.js');
 var StageView = require('./views/stage.js');
 var ControlsView = require('./views/controls.js');
@@ -204,12 +202,6 @@ var SharedState = State.extend({
 
 //------------------------------------------------------------------------------
 
-NProgress.configure({
-  minimum: 0.4,
-  trickleRate: 0.1,
-  trickleSpeed: 800
-});
-
 ready(function() {
   var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
@@ -281,11 +273,7 @@ ready(function() {
   });
 
   controlsState.on('change:digits', function() {
-    NProgress.start();
-    subjectState.setDigits(this.digits, function() {
-      NProgress.done();
-      rowsState.value = rowsState.max;
-    });
+    rowsState.value = rowsState.max;
   });
 
   stageState.on('change:displayMode change:limit', function() {

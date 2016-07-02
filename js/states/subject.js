@@ -19,19 +19,31 @@ var SubjectState = State.extend({
     this.value = this.numbers.subjectValue()
   },
 
-  pi: function() {
+  pi: function(cb) {
     this.name = Numbers.PI;
-    this.numbers.setSubject(Numbers.PI, this.updateValue.bind(this));
+    var bound = this.updateValue.bind(this);
+    this.numbers.setSubject(Numbers.PI, function() {
+      bound();
+      cb();
+    });
   },
 
-  phi: function() {
+  phi: function(cb) {
     this.name = Numbers.PHI;
-    this.numbers.setSubject(Numbers.PHI, this.updateValue.bind(this));
+    var bound = this.updateValue.bind(this);
+    this.numbers.setSubject(Numbers.PHI, function() {
+      bound();
+      cb();
+    });
   },
 
-  e: function() {
+  e: function(cb) {
     this.name = Numbers.E;
-    this.numbers.setSubject(Numbers.E, this.updateValue.bind(this));
+    var bound = this.updateValue.bind(this);
+    this.numbers.setSubject(Numbers.E, function() {
+      bound();
+      cb();
+    });
   },
 
   setDigits: function(d, cb) {
