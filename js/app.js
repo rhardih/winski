@@ -65,7 +65,7 @@ var RowsState = SliderState.extend({
     max: {
       deps: ['subject.value', 'shared.columns'],
       fn: function() {
-        return Math.ceil(this.subject.value.length / this.shared.columns);
+        return Math.ceil((this.subject.value.length - 1) / this.shared.columns);
       }
     }
   }
