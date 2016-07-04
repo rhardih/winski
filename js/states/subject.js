@@ -54,9 +54,9 @@ var Num = State.extend({
 
     this.digits = n;
 
-    if (n > this.maxDigits) {
-      this.trigger('loading');
+    this.trigger('loading');
 
+    if (n > this.maxDigits) {
       url = [
         "data/",
         this.name,
@@ -72,6 +72,8 @@ var Num = State.extend({
 
         that.trigger('done');
       }, function() {});
+    } else {
+      this.trigger('done');
     }
   }
 });
