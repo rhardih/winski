@@ -276,7 +276,7 @@ ready(function() {
     stageView.render();
   })
 
-  stageState.subject.on('change:value', function() {
+  subjectState.on('change:value', function() {
     stageView.render();
   });
 
