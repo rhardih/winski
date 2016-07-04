@@ -117,6 +117,12 @@ var SubjectState = State.extend({
 
     this.number = this.pi;
 
+    this.on('change:digits', function() {
+      if (this.number.maxDigits < this.digits) {
+        this.number.setDigits(this.digits);
+      }
+    });
+
     // Fan-in loading and done events from children
     [this.phi, this.pi, this.e].forEach(function(num) {
       num.on('loading', function() {
@@ -171,11 +177,6 @@ var SubjectState = State.extend({
 
   setE: function() {
     this._setNum(Numbers.E, this.e);
-  },
-
-  setDigits: function(d) {
-    this.digits = d;
-    this.number.setDigits(d);
   }
 });
 
