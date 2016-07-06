@@ -24,6 +24,7 @@
   "dependencies": {
     "ampersand-state": "^5.0.2",
     "ampersand-view": "^10.0.1",
+    "canvg-browser": "^1.0.0",
     "handlebars": "^4.0.5",
     "hbsfy": "^2.7.0",
     "nprogress": "^0.2.0"

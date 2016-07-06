@@ -4,6 +4,7 @@ var View = require('ampersand-view');
 var SubjectState = require('./states/subject.js');
 var StageView = require('./views/stage.js');
 var ControlsView = require('./views/controls.js');
+var ImageDownloader = require('./image_downloader.js');
 
 //------------------------------------------------------------------------------
 
@@ -282,5 +283,15 @@ ready(function() {
 
   subjectState.on('done', function() {
     rowsState.value = rowsState.max;
+  });
+
+  //----------------------------------------------------------------------------
+
+  var save = document.querySelector('#save');
+
+  var imageDownloader = new ImageDownloader();
+
+  save.addEventListener('click', function() {
+    imageDownloader.run(stageState.width, stageState.height);
   });
 });
