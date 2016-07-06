@@ -5,9 +5,9 @@
   "main": "script.js",
   "scripts": {
     "index": "node compile_index.js > index.html",
-    "watch_scss": "sass --watch app.scss:app.css --style compressed",
+    "watch_scss": "sass --watch styles/app.scss:styles/app.css --style compressed",
     "watch_js": "watchify -t hbsfy js/app.js -o js/app.bundle.js --debug --verbose",
-    "build_scss": "sass app.scss:app.css --style compressed",
+    "build_scss": "sass styles/app.scss:styles/app.css --style compressed",
     "build_js": "npm run build_js_app && npm run build_js_dl",
     "build_js_app": "browserify -t hbsfy js/app.js | bundle-collapser > js/app.bundle.js",
     "build_js_dl": "browserify js/download.js | bundle-collapser > js/download.bundle.js",
