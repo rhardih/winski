@@ -3,19 +3,33 @@ var View = require('ampersand-view');
 //------------------------------------------------------------------------------
 
 var StageView = View.extend({
-  template: '<svg id="stage"></svg>',
+  template: '<svg id="stage"><rect data-hook="background" fill="#000"></rect></svg>',
 
   autoRender: true,
 
   bindings: {
-    "model.width": {
-      type: "attribute",
-      name: "width"
-    },
-    "model.height": {
-      type: "attribute",
-      name: "height"
-    }
+      "model.width": [
+        {
+          type: "attribute",
+          name: "width"
+        },
+        {
+          hook: 'background',
+          type: "attribute",
+          name: "width"
+        }
+    ],
+    "model.height": [
+      {
+        type: "attribute",
+        name: "height"
+      },
+      {
+        hook: 'background',
+        type: "attribute",
+        name: "height"
+      },
+    ]
   },
 
   events: {

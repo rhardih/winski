@@ -161,9 +161,7 @@ var ControlsView = View.extend({
   },
 
   onDigitsChange: function(e) {
-    var value = +e.target.value;
-
-    this.model.subject.setDigits(value);
+    this.model.subject.digits = +e.target.value;
   }
 });
 

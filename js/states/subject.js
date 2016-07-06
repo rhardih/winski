@@ -54,9 +54,9 @@ var Num = State.extend({
 
     this.digits = n;
 
-    if (n > this.maxDigits) {
-      this.trigger('loading');
+    this.trigger('loading');
 
+    if (n > this.maxDigits) {
       url = [
         "data/",
         this.name,
@@ -72,6 +72,8 @@ var Num = State.extend({
 
         that.trigger('done');
       }, function() {});
+    } else {
+      this.trigger('done');
     }
   }
 });
@@ -114,6 +116,12 @@ var SubjectState = State.extend({
     var that = this;
 
     this.number = this.pi;
+
+    this.on('change:digits', function() {
+      if (this.number.maxDigits < this.digits) {
+        this.number.setDigits(this.digits);
+      }
+    });
 
     // Fan-in loading and done events from children
     [this.phi, this.pi, this.e].forEach(function(num) {
@@ -169,11 +177,6 @@ var SubjectState = State.extend({
 
   setE: function() {
     this._setNum(Numbers.E, this.e);
-  },
-
-  setDigits: function(d) {
-    this.digits = d;
-    this.number.setDigits(d);
   }
 });
 
