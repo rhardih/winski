@@ -61,11 +61,11 @@
             
               <div id="rows-label-input" class="label-input-wrap" title="Number of rows shown">
                 <label for="rows-slider">Rows</label>
-                <input type="text" size="6" name="rows-value" tabindex="1"></input>
+                <input type="text" size="6" name="rows-value" tabindex="1">
               </div>
               <div id="columns-label-input" class="label-input-wrap" title="Number of columns shown">
                 <label for="columns-slider">Columns</label>
-                <input type="text" size="6" name="columns-value" tabindex="2"></input>
+                <input type="text" size="6" name="columns-value" tabindex="2">
               </div>
               <div>Digits</div>
             
@@ -84,17 +84,19 @@
             
               <div id="radius-label-input" class="label-input-wrap" title="Radius of each circle">
                 <label for="radius-slider">Radius</label>
-                <input type="text" size="6" name="radius-value" tabindex="3"></input>
+                <input type="text" size="6" name="radius-value" tabindex="3">
               </div>
               <div id="spacing-label-input" class="label-input-wrap" title="Spacing between each circle">
                 <label for="spacing-slider">Spacing</label>
-                <input type="text" size="6" name="spacing-value" tabindex="4"></input>
+                <input type="text" size="6" name="spacing-value" tabindex="4">
               </div>
-              <div>&nbsp;</div>
+              <div>Save image</div>
             
               <input id="radius-slider" type="range">
               <input id="spacing-slider" type="range">
-              <div>&nbsp;</div>
+              <div>
+                <a id="save" title="Download as PNG">&#11015;</a>
+              </div>
             </div>
           </div>
 
@@ -104,7 +106,7 @@
       </header>
     </div>
 
-    <svg id='stage' width="768"></svg>
+    <svg id='stage'></svg>
 
     <div class='wrap'>
       <footer>
