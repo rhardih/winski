@@ -21,3 +21,7 @@ git checkout master
 git stash pop
 
 npm run index
+
+# re-trigger bundle build
+touch js/app.js
+touch js/download.js
