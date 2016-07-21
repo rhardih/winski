@@ -140,12 +140,30 @@ var SpacingState = SliderState.extend({
 
 var ControlsState = State.extend({
   props: {
-    digits: ['number', true, 3],
     subject: 'state',
     rows: 'state',
     columns: 'state',
     spacing: 'state',
     radius: 'state'
+  },
+
+  derived: {
+    downloadDisabled: {
+      deps: ['subject.digits'],
+      fn: function() {
+        return this.subject.digits > 4;
+      }
+    },
+    downloadTitle: {
+      deps: ['downloadDisabled'],
+      fn: function() {
+        if (this.downloadDisabled) {
+          return "Image too big, download not possible" 
+        } else {
+          return  "Download as PNG"
+        }
+      }
+    }
   }
 });
 
@@ -291,7 +309,13 @@ ready(function() {
 
   var imageDownloader = new ImageDownloader();
 
-  save.addEventListener('click', function() {
-    imageDownloader.run(stageState.width, stageState.height);
+  save.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    if (controlsState.subject.digits < 5) {
+      imageDownloader.run(stageState.width, stageState.height);
+    }
+
+    return false;
   });
 });

@@ -72,6 +72,16 @@ var ControlsView = View.extend({
         "pi": "#pi-link",
         "e": "#e-link"
       }
+    },
+    "model.downloadDisabled": {
+      type: 'booleanClass',
+      name: 'disabled',
+      hook: "download"
+    },
+    "model.downloadTitle": {
+      type: 'attribute',
+      name: 'title',
+      selector: '#download-label'
     }
   },
 
