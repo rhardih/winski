@@ -2,12 +2,19 @@ var canvg = require('canvg-browser');
 
 //------------------------------------------------------------------------------
 
-var svg = sessionStorage.getItem('winski-svg');
 var canvas = document.createElement('canvas');
 var img = document.createElement('img');
 
-canvg(canvas, svg)
+var msgEl = document.querySelector('#message');
 
-img.src = canvas.toDataURL('image/png');
+window.addEventListener("message", function(e){
+  canvg(canvas, e.data, {
+    renderCallback: function() {
+      msgEl.innerHTML = 'Right click image and save as:'
+
+      img.src = canvas.toDataURL('image/png');
+    }
+  });
+}, false);
 
 document.querySelector('#content').appendChild(img);
