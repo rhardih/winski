@@ -141,12 +141,30 @@ var SpacingState = SliderState.extend({
 
 var ControlsState = State.extend({
   props: {
-    digits: ['number', true, 3],
     subject: 'state',
     rows: 'state',
     columns: 'state',
     spacing: 'state',
     radius: 'state'
+  },
+
+  derived: {
+    downloadDisabled: {
+      deps: ['subject.digits'],
+      fn: function() {
+        return this.subject.digits > 4;
+      }
+    },
+    downloadTitle: {
+      deps: ['downloadDisabled'],
+      fn: function() {
+        if (this.downloadDisabled) {
+          return "Image too big, download not possible" 
+        } else {
+          return  "Download as PNG"
+        }
+      }
+    }
   }
 });
 
@@ -292,8 +310,14 @@ ready(function() {
 
   var imageDownloader = new ImageDownloader();
 
-  save.addEventListener('click', function() {
-    imageDownloader.run(stageState.width, stageState.height);
+  save.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    if (controlsState.subject.digits < 5) {
+      imageDownloader.run(stageState.width, stageState.height);
+    }
+
+    return false;
   });
 });
 },{}],2:[function(require,module,exports){
@@ -508,7 +532,7 @@ module.exports = SubjectState;
 },{}],4:[function(require,module,exports){
 var HandlebarsCompiler = require(41);
 module.exports = HandlebarsCompiler.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div id='dropdown-controls' class=\"flex\">\n  <a id=\"phi-link\" href=\"#phi\" title=\"Phi\" class=\"subject\">&phi;</a>\n  <a id=\"pi-link\" href=\"#pi\" title=\"Pi\" class=\"subject active\">&pi;</a>\n  <a id=\"e-link\" href=\"#e\" title=\"Euler's number\" class=\"subject\">e</a>\n\n  <div id=\"rows-label-input\" class=\"label-input-wrap\" title=\"Number of rows shown\">\n    <label for=\"rows-slider\">Rows</label>\n    <input type=\"text\" size=\"6\" name=\"rows-value\" tabindex=\"1\">\n  </div>\n  <div id=\"columns-label-input\" class=\"label-input-wrap\" title=\"Number of columns shown\">\n    <label for=\"columns-slider\">Columns</label>\n    <input type=\"text\" size=\"6\" name=\"columns-value\" tabindex=\"2\">\n  </div>\n  <div>Digits</div>\n\n  <input id=\"rows-slider\" type=\"range\">\n  <input id=\"columns-slider\" type=\"range\">\n  <div id=\"digits-radio\" class=\"flex\">\n    <input id=\"digit-1k\" type=\"radio\" name=\"digits\" value=\"3\" checked=\"checked\">\n    <label for=\"digit-1k\">10<sup>3</sup></label>\n    <input id=\"digit-10k\" type=\"radio\" name=\"digits\" value=\"4\">\n    <label for=\"digit-10k\">10<sup>4</sup></label>\n    <input id=\"digit-100k\" type=\"radio\" name=\"digits\" value=\"5\">\n    <label for=\"digit-100k\">10<sup>5</sup></label>\n    <input id=\"digit-1m\" type=\"radio\" name=\"digits\" value=\"6\">\n    <label for=\"digit-1m\">10<sup>6</sup></label>\n  </div>\n\n  <div id=\"radius-label-input\" class=\"label-input-wrap\" title=\"Radius of each circle\">\n    <label for=\"radius-slider\">Radius</label>\n    <input type=\"text\" size=\"6\" name=\"radius-value\" tabindex=\"3\">\n  </div>\n  <div id=\"spacing-label-input\" class=\"label-input-wrap\" title=\"Spacing between each circle\">\n    <label for=\"spacing-slider\">Spacing</label>\n    <input type=\"text\" size=\"6\" name=\"spacing-value\" tabindex=\"4\">\n  </div>\n  <div>Save image</div>\n\n  <input id=\"radius-slider\" type=\"range\">\n  <input id=\"spacing-slider\" type=\"range\">\n  <div>\n    <a id=\"save\" title=\"Download as PNG\">&#11015;</a>\n  </div>\n</div>\n";
+    return "<div id='dropdown-controls' class=\"flex\">\n  <a id=\"phi-link\" href=\"#phi\" title=\"Phi\" class=\"subject\">&phi;</a>\n  <a id=\"pi-link\" href=\"#pi\" title=\"Pi\" class=\"subject active\">&pi;</a>\n  <a id=\"e-link\" href=\"#e\" title=\"Euler's number\" class=\"subject\">e</a>\n\n  <div id=\"rows-label-input\" class=\"label-input-wrap\" title=\"Number of rows shown\">\n    <label for=\"rows-slider\">Rows</label>\n    <input type=\"text\" size=\"6\" name=\"rows-value\" tabindex=\"1\">\n  </div>\n  <div id=\"columns-label-input\" class=\"label-input-wrap\" title=\"Number of columns shown\">\n    <label for=\"columns-slider\">Columns</label>\n    <input type=\"text\" size=\"6\" name=\"columns-value\" tabindex=\"2\">\n  </div>\n  <div>Digits</div>\n\n  <input id=\"rows-slider\" type=\"range\">\n  <input id=\"columns-slider\" type=\"range\">\n  <div id=\"digits-radio\" class=\"flex\">\n    <input id=\"digit-1k\" type=\"radio\" name=\"digits\" value=\"3\" checked=\"checked\">\n    <label for=\"digit-1k\">10<sup>3</sup></label>\n    <input id=\"digit-10k\" type=\"radio\" name=\"digits\" value=\"4\">\n    <label for=\"digit-10k\">10<sup>4</sup></label>\n    <input id=\"digit-100k\" type=\"radio\" name=\"digits\" value=\"5\">\n    <label for=\"digit-100k\">10<sup>5</sup></label>\n    <input id=\"digit-1m\" type=\"radio\" name=\"digits\" value=\"6\">\n    <label for=\"digit-1m\">10<sup>6</sup></label>\n  </div>\n\n  <div id=\"radius-label-input\" class=\"label-input-wrap\" title=\"Radius of each circle\">\n    <label for=\"radius-slider\">Radius</label>\n    <input type=\"text\" size=\"6\" name=\"radius-value\" tabindex=\"3\">\n  </div>\n  <div id=\"spacing-label-input\" class=\"label-input-wrap\" title=\"Spacing between each circle\">\n    <label for=\"spacing-slider\">Spacing</label>\n    <input type=\"text\" size=\"6\" name=\"spacing-value\" tabindex=\"4\">\n  </div>\n  <div id=\"download-label\" data-hook=\"download\" title=\"Download as PNG\">Save image</div>\n\n  <input id=\"radius-slider\" type=\"range\">\n  <input id=\"spacing-slider\" type=\"range\">\n  <div data-hook=\"download\">\n    <a id=\"save\" href=\"/download.html\">&#11015;</a>\n  </div>\n</div>\n";
 },"useData":true});
 },{}],5:[function(require,module,exports){
 var View = require(14);
@@ -585,6 +609,16 @@ var ControlsView = View.extend({
         "pi": "#pi-link",
         "e": "#e-link"
       }
+    },
+    "model.downloadDisabled": {
+      type: 'booleanClass',
+      name: 'disabled',
+      hook: "download"
+    },
+    "model.downloadTitle": {
+      type: 'attribute',
+      name: 'title',
+      selector: '#download-label'
     }
   },
 
