@@ -60,23 +60,25 @@ var StageView = View.extend({
 
     var cols = this.model.shared.columns;
     var displayMode = this.model.displayMode;
-    var subject = this.model.subject.value;
+    var offset = this.model.shared.offset * cols;
+    // extract subject accounting for offset
+    var subject = this.model.subject.value.substring(offset);
+    var radius = this.model.shared.radius;
+    var limit = this.model.limit;
 
     var svg = this.svg;
-    var limit = this.model.limit;
-    var strokeWidth;
+    var strokeWidth = radius / 2.5;
     var circlesData = [];
     var linesData = [];
-    var thisDigit;
+    var thisDigit, nextDigit;
     var digitSW, digitW, digitNW, digitN;
     var iSW, iW, iNW, iN;
-    var nextDigit = 3;
     var thisX, nextX, thisY, nextY;
     var thisColor;
     var firstCol, lastCol, firstRow, lastRow;
     var datum;
     var i, xIndex;
-    var radius = this.model.shared.radius;
+
     var xCoord = function(i) {
       return radius + (i % cols) * (that.model.shared.spacing + 2 * radius);
     }
@@ -88,10 +90,9 @@ var StageView = View.extend({
         circlesData[i].hasEqualNeighbour = true;
       }
     };
-    strokeWidth = radius / 2.5;
 
     for (i = 0; i < limit; i++) {
-      thisDigit = nextDigit;
+      thisDigit = parseInt(subject.charAt(i), 10);
       nextDigit = parseInt(subject.charAt(i + 1), 10);
       thisColor = this.colors[thisDigit];
       thisX = xCoord(i);

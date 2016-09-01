@@ -110,6 +110,13 @@ var ControlsView = View.extend({
         return new InputView({ el: el, model: this.model.spacing });
       }
     },
+    offsetLabelInput: {
+      selector: "#offset-label-input input",
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.offset });
+      }
+    },
+
     columnsSlider: {
       selector: '#columns-slider',
       prepareView: function(el) {
@@ -132,6 +139,12 @@ var ControlsView = View.extend({
       selector: '#radius-slider',
       prepareView: function(el) {
         return new InputView({ el: el, model: this.model.radius });
+      }
+    },
+    offsetSlider: {
+      selector: '#offset-slider',
+      prepareView: function(el) {
+        return new InputView({ el: el, model: this.model.offset });
       }
     }
   },
