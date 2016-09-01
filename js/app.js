@@ -4,6 +4,7 @@ var View = require('ampersand-view');
 var SubjectState = require('./states/subject.js');
 var StageView = require('./views/stage.js');
 var ControlsView = require('./views/controls.js');
+var LinksView = require('./views/links.js');
 var ImageDownloader = require('./image_downloader.js');
 
 //------------------------------------------------------------------------------
@@ -14,6 +15,7 @@ var RADIUS = 7;
 var ROWS = 50;
 var COLUMNS = 20;
 var SPACING = 25;
+var OFFSET = 0;
 
 //------------------------------------------------------------------------------
 
@@ -138,13 +140,30 @@ var SpacingState = SliderState.extend({
   }
 });
 
-var ControlsState = State.extend({
+var OffsetState = SliderState.extend({
+  props: {
+    shared: 'state',
+    subject: 'state',
+
+    min: ['number', true, 0],
+    value: ['number', true, OFFSET],
+  },
+
+  derived: {
+    max: {
+      deps: ['subject.value', 'shared.rows', 'shared.columns'],
+      fn: function() {
+        var tmp = Math.floor(this.subject.value.length / this.shared.columns) -
+          this.shared.rows
+        return Math.max(tmp, 0);
+      }
+    }
+  }
+});
+
+var LinksState = State.extend({
   props: {
     subject: 'state',
-    rows: 'state',
-    columns: 'state',
-    spacing: 'state',
-    radius: 'state'
   },
 
   derived: {
@@ -165,14 +184,25 @@ var ControlsState = State.extend({
       }
     }
   }
+})
+
+var ControlsState = State.extend({
+  props: {
+    subject: 'state',
+    rows: 'state',
+    columns: 'state',
+    spacing: 'state',
+    radius: 'state',
+    offset: 'state'
+  },
 });
 
 var StageState = State.extend({
   props: {
     shared: 'state',
+    subject: 'state',
 
     displayMode: ['number', true, 0],
-    subject: 'state',
   },
 
   derived: {
@@ -210,6 +240,7 @@ var SharedState = State.extend({
     columns: { type: 'number', required: true, default: COLUMNS },
     radius: { type: 'number', required: true, default: RADIUS },
     spacing: { type: 'number', required: true, default: SPACING },
+    offset: { type: 'number', required: true, default: OFFSET },
   }, function(v) {
     if (v < 0 || isNaN(v)) {
       return "Must be a positive number";
@@ -224,6 +255,7 @@ var SharedState = State.extend({
 ready(function() {
   var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
+  var linksEl = document.querySelector('#dropdown-links');
 
   //----------------------------------------------------------------------------
 
@@ -234,13 +266,19 @@ ready(function() {
   var columnsState = new ColumnsState({ shared: sharedState });
   var radiusState = new RadiusState({ shared: sharedState });
   var spacingState = new SpacingState({ shared: sharedState });
+  var offsetState = new OffsetState({ shared: sharedState, subject: subjectState });
 
   var controlsState = new ControlsState({
     subject: subjectState,
     rows: rowsState,
     columns: columnsState,
     spacing: spacingState,
-    radius: radiusState
+    radius: radiusState,
+    offset: offsetState
+  });
+
+  var linksState = new LinksState({
+    subject: subjectState
   });
 
   var stageState = new StageState({
@@ -252,6 +290,11 @@ ready(function() {
   var controlsView = new ControlsView({
     model: controlsState,
     el: controlsEl,
+  });
+
+  var linksView = new LinksView({
+    model: linksState,
+    el: linksEl
   });
 
   var stageView = new StageView({
@@ -275,6 +318,11 @@ ready(function() {
     sharedState.spacing = this.boundedValue;
   });
 
+  offsetState.on('change:boundedValue', function() {
+    sharedState.offset = this.boundedValue;
+  });
+
+
   sharedState.on('change:columns', function() {
     columnsState.value = this.columns;
   });
@@ -287,13 +335,19 @@ ready(function() {
     radiusState.value = this.radius;
   });
 
+  sharedState.on('change:offset', function() {
+    offsetState.value = this.offset;
+  });
+
   sharedState.on('change', function() {
     stageView.render();
   });
 
+
   stageState.on('change:displayMode change:limit', function() {
     stageView.render();
   })
+
 
   subjectState.on('change:value', function() {
     stageView.render();

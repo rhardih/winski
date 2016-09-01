@@ -154,8 +154,38 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
     max-height: 500px;
   }
 
-  &:checked ~ #dropdown-label:after {
+  &:checked ~ #dropdown-toggle #dropdown-label:after {
     content: "︽";
+  }
+
+  &:checked ~ #dropdown-toggle #dropdown-links {
+    opacity: 1;
+  }
+}
+
+#dropdown-toggle {
+  position: relative;
+
+  #dropdown-links {
+    transition: opacity $animation-duration ease-out;
+    margin: 1rem;
+    opacity: 0;
+    position: absolute;
+    line-height: 2rem;
+
+    #save {
+      color: $willow-grove;
+      text-decoration: none;
+
+      &:hover {
+        color: lighten($willow-grove, 10%);
+      }
+
+      &.disabled {
+        cursor: default;
+        color: $mine-shaft;
+      }
+    }
   }
 }
 
@@ -163,7 +193,7 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
   @include cursor-pointer;
   @include noselect;
 
-  // remainig styles defined inline
+  // remaining styles defined inline
 }
 
 #dropdown-controls {
@@ -244,21 +274,6 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
   .disabled {
     cursor: default;
     color: $mine-shaft;
-
-    #save {
-      cursor: inherit;
-      color: inherit;
-    }
-  }
-
-  #save {
-    display: inline-block;
-    font-weight: bolder;
-    text-decoration: underline;
-    color: $willow-grove;
-    -webkit-transform:scale(2,1);
-    -ms-transform:scale(2,1);
-    transform:scale(2,1);
   }
 }
 
