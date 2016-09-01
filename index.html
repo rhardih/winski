@@ -67,7 +67,7 @@
                 <label for="columns-slider">Columns</label>
                 <input type="text" size="6" name="columns-value" tabindex="2">
               </div>
-              <div>Digits</div>
+              <div title="Number of digits to load">Digits</div>
             
               <input id="rows-slider" type="range">
               <input id="columns-slider" type="range">
@@ -90,19 +90,27 @@
                 <label for="spacing-slider">Spacing</label>
                 <input type="text" size="6" name="spacing-value" tabindex="4">
               </div>
-              <div id="download-label" data-hook="download" title="Download as PNG">Save image</div>
+            
+              <div id="offset-label-input" class="label-input-wrap" title="Row to start from">
+                <label for="offset-slider">Offset</label>
+                <input type="text" size="6" name="offset-value" tabindex="4">
+              </div>
             
               <input id="radius-slider" type="range">
               <input id="spacing-slider" type="range">
-              <div data-hook="download">
-                <a id="save" href="/download.html">&#11015;</a>
-              </div>
+              <input id="offset-slider" type="range">
+            
             </div>
           </div>
 
-          <label id="dropdown-label" for="dropdown-check"></label>
-        </div>
+          <div id='dropdown-toggle'>
+            <div id='dropdown-links'>
+              <a id="save" href="/download.html" data-hook="download">Save image</a>
+            </div>
 
+            <label id="dropdown-label" for="dropdown-check"></label>
+          </div>
+        </div>
       </header>
     </div>
 
