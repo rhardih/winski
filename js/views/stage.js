@@ -3,7 +3,8 @@ var View = require('ampersand-view');
 //------------------------------------------------------------------------------
 
 var StageView = View.extend({
-  template: '<svg id="stage"><rect data-hook="background" fill="#000"></rect></svg>',
+  template: '<svg id="stage" xmlns="http://www.w3.org/2000/svg">' +
+    '<rect data-hook="background" fill="#000"></rect></svg>',
 
   autoRender: true,
 
