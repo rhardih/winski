@@ -354,7 +354,7 @@ ready(function() {
   });
 
   subjectState.on('done', function() {
-    rowsState.value = rowsState.max;
+    //rowsState.value = rowsState.max;
   });
 
   //----------------------------------------------------------------------------
