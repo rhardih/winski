@@ -11,11 +11,24 @@ var ImageDownloader = require('./image_downloader.js');
 
 // Initial values
 
-var RADIUS = 7;
-var ROWS = 50;
-var COLUMNS = 20;
-var SPACING = 25;
-var OFFSET = 0;
+var paramsStr = location.search.substr(1);
+var params = {}, tmp;
+
+if (paramsStr.length > 0) {
+  paramsStr.split("&").forEach(function(e) {
+    tmp = e.split("=");
+    params[decodeURIComponent(tmp[0])] =
+      parseInt(decodeURIComponent(tmp[1]), 10);
+  });
+}
+
+var ROWS = params.ro || 50;
+var COLUMNS = params.co || 20;
+var RADIUS = params.ra || 7;
+var SPACING = params.sp || 25;
+var OFFSET = params.of || 0;
+var DISPLAYMODE = params.dm || 0;
+var DIGITS = params.di || 3;
 
 //------------------------------------------------------------------------------
 
@@ -164,7 +177,8 @@ var OffsetState = SliderState.extend({
 var LinksState = State.extend({
   props: {
     subject: 'state',
-    shared: 'state'
+    shared: 'state',
+    stage: 'state'
   },
 
   derived: {
@@ -187,11 +201,12 @@ var LinksState = State.extend({
     url: {
       deps: [
         'shared.rows',
-        'shared.cols',
+        'shared.columns',
         'subject.digits',
         'shared.radius',
         'shared.spacing',
-        'shared.offset'
+        'shared.offset',
+        'stage.displayMode'
       ],
       fn: function() {
         var tmp = {
@@ -200,7 +215,8 @@ var LinksState = State.extend({
           di: this.subject.digits,
           ra: this.shared.radius,
           sp: this.shared.spacing,
-          of: this.shared.offset
+          of: this.shared.offset,
+          dm: this.stage.displayMode
         }
 
         var params = Object.keys(tmp).map(function(key){
@@ -222,6 +238,33 @@ var ControlsState = State.extend({
     radius: 'state',
     offset: 'state'
   },
+
+  derived: {
+    "digit1k": {
+      deps: ["subject.digits"],
+      fn: function() {
+        return this.subject.digits === 3;
+      }
+    },
+    "digit10k": {
+      deps: ["subject.digits"],
+      fn: function() {
+        return this.subject.digits === 4;
+      }
+    },
+    "digit100k": {
+      deps: ["subject.digits"],
+      fn: function() {
+        return this.subject.digits === 5;
+      }
+    },
+    "digit1m": {
+      deps: ["subject.digits"],
+      fn: function() {
+        return this.subject.digits === 6;
+      }
+    }
+  }
 });
 
 var StageState = State.extend({
@@ -229,7 +272,7 @@ var StageState = State.extend({
     shared: 'state',
     subject: 'state',
 
-    displayMode: ['number', true, 0],
+    displayMode: ['number', true, DISPLAYMODE],
   },
 
   derived: {
@@ -279,15 +322,15 @@ var SharedState = State.extend({
 
 //------------------------------------------------------------------------------
 
-ready(function() {
+var sharedState = new SharedState();
+var subjectState = new SubjectState();
+
+var load = function() {
   var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
   var linksEl = document.querySelector('#dropdown-links');
 
   //----------------------------------------------------------------------------
-
-  var sharedState = new SharedState();
-  var subjectState = new SubjectState();
 
   var rowsState = new RowsState({ shared: sharedState, subject: subjectState });
   var columnsState = new ColumnsState({ shared: sharedState });
@@ -304,15 +347,16 @@ ready(function() {
     offset: offsetState
   });
 
-  var linksState = new LinksState({
-    subject: subjectState,
-    shared: sharedState
-  });
-
   var stageState = new StageState({
     shared: sharedState,
     subject: subjectState,
     controls: controlsState
+  });
+
+  var linksState = new LinksState({
+    subject: subjectState,
+    shared: sharedState,
+    stage: stageState
   });
 
   var controlsView = new ControlsView({
@@ -381,10 +425,6 @@ ready(function() {
     stageView.render();
   });
 
-  subjectState.on('done', function() {
-    //rowsState.value = rowsState.max;
-  });
-
   //----------------------------------------------------------------------------
 
   var save = document.querySelector('#save');
@@ -400,4 +440,13 @@ ready(function() {
 
     return false;
   });
-});
+}
+
+if (DIGITS > 3) {
+  subjectState.on('done', function() {
+    ready(load);
+  });
+  subjectState.digits = DIGITS;
+} else {
+  ready(load);
+}

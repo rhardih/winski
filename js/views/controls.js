@@ -73,6 +73,30 @@ var ControlsView = View.extend({
         "e": "#e-link"
       }
     },
+    "model.digit1k":
+      {
+      type: 'booleanAttribute',
+      selector: '#digit-1k',
+      name: 'checked',
+    },
+    "model.digit10k":
+      {
+      type: 'booleanAttribute',
+      selector: '#digit-10k',
+      name: 'checked',
+    },
+    "model.digit100k":
+      {
+      type: 'booleanAttribute',
+      selector: '#digit-100k',
+      name: 'checked',
+    },
+    "model.digit1m":
+      {
+      type: 'booleanAttribute',
+      selector: '#digit-1m',
+      name: 'checked'
+    },
     "model.downloadDisabled": {
       type: 'booleanClass',
       name: 'disabled',
