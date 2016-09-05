@@ -96,16 +96,6 @@ var ControlsView = View.extend({
       type: 'booleanAttribute',
       selector: '#digit-1m',
       name: 'checked'
-    },
-    "model.downloadDisabled": {
-      type: 'booleanClass',
-      name: 'disabled',
-      hook: "download"
-    },
-    "model.downloadTitle": {
-      type: 'attribute',
-      name: 'title',
-      selector: '#download-label'
     }
   },
 
