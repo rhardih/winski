@@ -2,6 +2,8 @@ var State = require('ampersand-state');
 var View = require('ampersand-view');
 
 var SubjectState = require('./states/subject.js');
+var LinksState = require('./states/links.js');
+var ControlsState = require('./states/controls.js');
 var StageView = require('./views/stage.js');
 var ControlsView = require('./views/controls.js');
 var LinksView = require('./views/links.js');
@@ -11,11 +13,24 @@ var ImageDownloader = require('./image_downloader.js');
 
 // Initial values
 
-var RADIUS = 7;
-var ROWS = 50;
-var COLUMNS = 20;
-var SPACING = 25;
-var OFFSET = 0;
+var paramsStr = location.search.substr(1);
+var params = {}, tmp;
+
+if (paramsStr.length > 0) {
+  paramsStr.split("&").forEach(function(e) {
+    tmp = e.split("=");
+    params[decodeURIComponent(tmp[0])] =
+      parseInt(decodeURIComponent(tmp[1]), 10);
+  });
+}
+
+var ROWS = params.ro || 50;
+var COLUMNS = params.co || 20;
+var RADIUS = params.ra || 7;
+var SPACING = params.sp || 25;
+var OFFSET = params.of || 0;
+var DISPLAYMODE = params.dm || 0;
+var DIGITS = params.di || 3;
 
 //------------------------------------------------------------------------------
 
@@ -161,48 +176,12 @@ var OffsetState = SliderState.extend({
   }
 });
 
-var LinksState = State.extend({
-  props: {
-    subject: 'state',
-  },
-
-  derived: {
-    downloadDisabled: {
-      deps: ['subject.digits'],
-      fn: function() {
-        return this.subject.digits > 4;
-      }
-    },
-    downloadTitle: {
-      deps: ['downloadDisabled'],
-      fn: function() {
-        if (this.downloadDisabled) {
-          return "Image too big, download not possible" 
-        } else {
-          return  "Download as PNG"
-        }
-      }
-    }
-  }
-})
-
-var ControlsState = State.extend({
-  props: {
-    subject: 'state',
-    rows: 'state',
-    columns: 'state',
-    spacing: 'state',
-    radius: 'state',
-    offset: 'state'
-  },
-});
-
 var StageState = State.extend({
   props: {
     shared: 'state',
     subject: 'state',
 
-    displayMode: ['number', true, 0],
+    displayMode: ['number', true, DISPLAYMODE],
   },
 
   derived: {
@@ -252,15 +231,15 @@ var SharedState = State.extend({
 
 //------------------------------------------------------------------------------
 
-ready(function() {
+var sharedState = new SharedState();
+var subjectState = new SubjectState();
+
+var load = function() {
   var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
   var linksEl = document.querySelector('#dropdown-links');
 
   //----------------------------------------------------------------------------
-
-  var sharedState = new SharedState();
-  var subjectState = new SubjectState();
 
   var rowsState = new RowsState({ shared: sharedState, subject: subjectState });
   var columnsState = new ColumnsState({ shared: sharedState });
@@ -277,14 +256,16 @@ ready(function() {
     offset: offsetState
   });
 
-  var linksState = new LinksState({
-    subject: subjectState
-  });
-
   var stageState = new StageState({
     shared: sharedState,
     subject: subjectState,
     controls: controlsState
+  });
+
+  var linksState = new LinksState({
+    subject: subjectState,
+    shared: sharedState,
+    stage: stageState
   });
 
   var controlsView = new ControlsView({
@@ -353,10 +334,6 @@ ready(function() {
     stageView.render();
   });
 
-  subjectState.on('done', function() {
-    //rowsState.value = rowsState.max;
-  });
-
   //----------------------------------------------------------------------------
 
   var save = document.querySelector('#save');
@@ -372,4 +349,13 @@ ready(function() {
 
     return false;
   });
-});
+}
+
+if (DIGITS > 3) {
+  subjectState.on('done', function() {
+    ready(load);
+  });
+  subjectState.digits = DIGITS;
+} else {
+  ready(load);
+}

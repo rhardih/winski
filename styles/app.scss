@@ -167,13 +167,17 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
   position: relative;
 
   #dropdown-links {
+    @include flex-display;
+    @include flex-justify(space-around);
+
     transition: opacity $animation-duration ease-out;
     margin: 1rem;
     opacity: 0;
     position: absolute;
     line-height: 2rem;
+    width: 40%;
 
-    #save {
+    a {
       color: $willow-grove;
       text-decoration: none;
 

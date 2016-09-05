@@ -5,6 +5,8 @@ var View = require('ampersand-view');
 var LinksView = View.extend({
   template: require('../templates/links.hbs'),
 
+  autoRender: true,
+
   bindings: {
     "model.downloadDisabled": {
       type: 'booleanClass',
@@ -15,6 +17,11 @@ var LinksView = View.extend({
       type: 'attribute',
       name: 'title',
       hook: 'download'
+    },
+    "model.url": {
+      type: 'attribute',
+      name: 'href',
+      hook: 'perma'
     }
   },
 });
