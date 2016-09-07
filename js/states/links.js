@@ -6,7 +6,8 @@ var LinksState = State.extend({
   props: {
     subject: 'state',
     shared: 'state',
-    stage: 'state'
+    stage: 'state',
+    controls: 'state'
   },
 
   derived: {
@@ -16,14 +17,26 @@ var LinksState = State.extend({
         return this.subject.digits > 4;
       }
     },
-    downloadTitle: {
+    downloadDisabledTitle: {
       deps: ['downloadDisabled'],
       fn: function() {
         if (this.downloadDisabled) {
           return "Image too big, download not possible"
         } else {
-          return  "Download as PNG"
+          return undefined;
         }
+      }
+    },
+    downloadTitlePng: {
+      deps: ['downloadDisabledTitle'],
+      fn: function() {
+        return this.downloadDisabledTitle || "Download as PNG";
+      }
+    },
+    downloadTitleSvg: {
+      deps: ['downloadDisabledTitle'],
+      fn: function() {
+        return this.downloadDisabledTitle || "Download as SVG";
       }
     },
     url: {

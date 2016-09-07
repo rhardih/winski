@@ -7,7 +7,6 @@ var ControlsState = require('./states/controls.js');
 var StageView = require('./views/stage.js');
 var ControlsView = require('./views/controls.js');
 var LinksView = require('./views/links.js');
-var ImageDownloader = require('./image_downloader.js');
 
 //------------------------------------------------------------------------------
 
@@ -265,7 +264,8 @@ var load = function() {
   var linksState = new LinksState({
     subject: subjectState,
     shared: sharedState,
-    stage: stageState
+    stage: stageState,
+    controls: controlsState
   });
 
   var controlsView = new ControlsView({
@@ -332,22 +332,6 @@ var load = function() {
 
   subjectState.on('change:value', function() {
     stageView.render();
-  });
-
-  //----------------------------------------------------------------------------
-
-  var save = document.querySelector('#save');
-
-  var imageDownloader = new ImageDownloader();
-
-  save.addEventListener('click', function(e) {
-    e.preventDefault();
-
-    if (controlsState.subject.digits < 5) {
-      imageDownloader.run(stageState.width, stageState.height);
-    }
-
-    return false;
   });
 }
 
