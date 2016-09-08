@@ -9,6 +9,7 @@ var LinksView = View.extend({
 
   autoRender: true,
   serializer: new XMLSerializer(),
+  iframe: undefined,
 
   events: {
     "click #save-png": "savePng",
@@ -58,6 +59,7 @@ var LinksView = View.extend({
         navigator.userAgent.indexOf('Chrome') == -1;
 
       var downloadHost, msgTarget;
+      var that = this;
 
       if (isSafari) {
         w = window.open('download.html');
@@ -66,14 +68,18 @@ var LinksView = View.extend({
           w.postMessage(serialized, document.location.origin);
         });
       } else {
-        iframe = document.createElement('iframe');
-        iframe.src = 'download.html';
+        if (!that.iframe) {
+          that.iframe = document.createElement('iframe');
+          that.iframe.src = 'download.html';
 
-        iframe.addEventListener('load', function() {
-          iframe.contentWindow.postMessage(serialized, document.location.origin);
-        });
+          that.iframe.addEventListener('load', function() {
+            that.iframe.contentWindow.postMessage(serialized, document.location.origin);
+          });
 
-        document.querySelector('#iframe-wrap').appendChild(iframe);
+          document.querySelector('#iframe-wrap').appendChild(that.iframe);
+        } else {
+          that.iframe.contentWindow.postMessage(serialized, document.location.origin);
+        }
       }
     }
   },
