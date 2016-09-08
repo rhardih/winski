@@ -1,20 +1,19 @@
 var canvg = require('canvg-browser');
+var FileSaver = require('file-saver');
+
+// Safari polyfill
+var ctb = require('./vendor/canvas-toBlob.js');
 
 //------------------------------------------------------------------------------
 
 var canvas = document.createElement('canvas');
-var img = document.createElement('img');
-
-var msgEl = document.querySelector('#message');
 
 window.addEventListener("message", function(e){
   canvg(canvas, e.data, {
     renderCallback: function() {
-      msgEl.innerHTML = 'Right click image and save as:'
-
-      img.src = canvas.toDataURL('image/png');
+      canvas.toBlob(function(blob) {
+        FileSaver.saveAs(blob, 'winski.png');
+      });
     }
   });
 }, false);
-
-document.querySelector('#content').appendChild(img);
