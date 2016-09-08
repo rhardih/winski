@@ -73,13 +73,13 @@
               <input id="columns-slider" type="range">
               <div id="digits-radio" class="flex">
                 <input id="digit-1k" type="radio" name="digits" value="3" checked="checked">
-                <label for="digit-1k">10<sup>3</sup></label>
+                <label for="digit-1k" title="One thousand digits">10<sup>3</sup></label>
                 <input id="digit-10k" type="radio" name="digits" value="4">
-                <label for="digit-10k">10<sup>4</sup></label>
+                <label for="digit-10k" title="Ten thousand digits">10<sup>4</sup></label>
                 <input id="digit-100k" type="radio" name="digits" value="5">
-                <label for="digit-100k">10<sup>5</sup></label>
+                <label for="digit-100k" title="One hundred thousand digits">10<sup>5</sup></label>
                 <input id="digit-1m" type="radio" name="digits" value="6">
-                <label for="digit-1m">10<sup>6</sup></label>
+                <label for="digit-1m" title="One million digits">10<sup>6</sup></label>
               </div>
             
               <div id="radius-label-input" class="label-input-wrap" title="Radius of each circle">
@@ -110,7 +110,7 @@
                 <a id="save-svg" class="download" href="/" data-hook="download-svg">SVG</a>
                 <a id="save-png" class="download" href="/" data-hook="download-png">PNG</a>
               </span>
-              <a id="permalink" data-hook="perma" href='/'>Permalink</a>
+              <a id="permalink" data-hook="perma" href='/' title="Direct link to current configuration">Permalink</a>
             </div>
 
             <label id="dropdown-label" for="dropdown-check"></label>
