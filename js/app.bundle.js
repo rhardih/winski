@@ -1,14 +1,13 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var State = require(17);
-var View = require(18);
+var State = require(16);
+var View = require(17);
 
-var SubjectState = require(5);
-var LinksState = require(4);
-var ControlsState = require(3);
-var StageView = require(10);
-var ControlsView = require(8);
-var LinksView = require(9);
-var ImageDownloader = require(2);
+var SubjectState = require(4);
+var LinksState = require(3);
+var ControlsState = require(2);
+var StageView = require(9);
+var ControlsView = require(7);
+var LinksView = require(8);
 
 //------------------------------------------------------------------------------
 
@@ -266,7 +265,8 @@ var load = function() {
   var linksState = new LinksState({
     subject: subjectState,
     shared: sharedState,
-    stage: stageState
+    stage: stageState,
+    controls: controlsState
   });
 
   var controlsView = new ControlsView({
@@ -334,22 +334,6 @@ var load = function() {
   subjectState.on('change:value', function() {
     stageView.render();
   });
-
-  //----------------------------------------------------------------------------
-
-  var save = document.querySelector('#save');
-
-  var imageDownloader = new ImageDownloader();
-
-  save.addEventListener('click', function(e) {
-    e.preventDefault();
-
-    if (controlsState.subject.digits < 5) {
-      imageDownloader.run(stageState.width, stageState.height);
-    }
-
-    return false;
-  });
 }
 
 if (DIGITS > 3) {
@@ -361,30 +345,7 @@ if (DIGITS > 3) {
   ready(load);
 }
 },{}],2:[function(require,module,exports){
-var ImageDownloader = function() {
-  this.serializer = new XMLSerializer();
-}
-
-ImageDownloader.prototype.run = function(width, height) {
-  var that = this;
-
-  var serialized = this.serializer.serializeToString(
-    document.querySelector('#stage')
-  )
-  var serializedb64 = 'data:image/svg+xml;base64,' + window.btoa(serialized);
-
-  var w = open('download.html');
-
-  w.addEventListener('load', function() {
-    w.postMessage(serialized, document.location.origin);
-  });
-}
-
-//------------------------------------------------------------------------------
-
-module.exports = ImageDownloader;
-},{}],3:[function(require,module,exports){
-var State = require(17);
+var State = require(16);
 
 //------------------------------------------------------------------------------
 
@@ -427,8 +388,8 @@ var ControlsState = State.extend({
 });
 
 module.exports = ControlsState;
-},{}],4:[function(require,module,exports){
-var State = require(17);
+},{}],3:[function(require,module,exports){
+var State = require(16);
 
 //------------------------------------------------------------------------------
 
@@ -436,7 +397,8 @@ var LinksState = State.extend({
   props: {
     subject: 'state',
     shared: 'state',
-    stage: 'state'
+    stage: 'state',
+    controls: 'state'
   },
 
   derived: {
@@ -446,14 +408,26 @@ var LinksState = State.extend({
         return this.subject.digits > 4;
       }
     },
-    downloadTitle: {
+    downloadDisabledTitle: {
       deps: ['downloadDisabled'],
       fn: function() {
         if (this.downloadDisabled) {
           return "Image too big, download not possible"
         } else {
-          return  "Download as PNG"
+          return undefined;
         }
+      }
+    },
+    downloadTitlePng: {
+      deps: ['downloadDisabledTitle'],
+      fn: function() {
+        return this.downloadDisabledTitle || "Download as PNG";
+      }
+    },
+    downloadTitleSvg: {
+      deps: ['downloadDisabledTitle'],
+      fn: function() {
+        return this.downloadDisabledTitle || "Download as SVG";
       }
     },
     url: {
@@ -488,8 +462,8 @@ var LinksState = State.extend({
 })
 
 module.exports = LinksState;
-},{}],5:[function(require,module,exports){
-var State = require(17);
+},{}],4:[function(require,module,exports){
+var State = require(16);
 
 //------------------------------------------------------------------------------
 
@@ -674,18 +648,18 @@ var SubjectState = State.extend({
 //------------------------------------------------------------------------------
 
 module.exports = SubjectState;
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var HandlebarsCompiler = require(45);
 module.exports = HandlebarsCompiler.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     return "<div id='dropdown-controls' class=\"flex\">\n  <a id=\"phi-link\" href=\"#phi\" title=\"Phi\" class=\"subject\">&phi;</a>\n  <a id=\"pi-link\" href=\"#pi\" title=\"Pi\" class=\"subject active\">&pi;</a>\n  <a id=\"e-link\" href=\"#e\" title=\"Euler's number\" class=\"subject\">e</a>\n\n  <div id=\"rows-label-input\" class=\"label-input-wrap\" title=\"Number of rows shown\">\n    <label for=\"rows-slider\">Rows</label>\n    <input type=\"text\" size=\"6\" name=\"rows-value\" tabindex=\"1\">\n  </div>\n  <div id=\"columns-label-input\" class=\"label-input-wrap\" title=\"Number of columns shown\">\n    <label for=\"columns-slider\">Columns</label>\n    <input type=\"text\" size=\"6\" name=\"columns-value\" tabindex=\"2\">\n  </div>\n  <div title=\"Number of digits to load\">Digits</div>\n\n  <input id=\"rows-slider\" type=\"range\">\n  <input id=\"columns-slider\" type=\"range\">\n  <div id=\"digits-radio\" class=\"flex\">\n    <input id=\"digit-1k\" type=\"radio\" name=\"digits\" value=\"3\" checked=\"checked\">\n    <label for=\"digit-1k\">10<sup>3</sup></label>\n    <input id=\"digit-10k\" type=\"radio\" name=\"digits\" value=\"4\">\n    <label for=\"digit-10k\">10<sup>4</sup></label>\n    <input id=\"digit-100k\" type=\"radio\" name=\"digits\" value=\"5\">\n    <label for=\"digit-100k\">10<sup>5</sup></label>\n    <input id=\"digit-1m\" type=\"radio\" name=\"digits\" value=\"6\">\n    <label for=\"digit-1m\">10<sup>6</sup></label>\n  </div>\n\n  <div id=\"radius-label-input\" class=\"label-input-wrap\" title=\"Radius of each circle\">\n    <label for=\"radius-slider\">Radius</label>\n    <input type=\"text\" size=\"6\" name=\"radius-value\" tabindex=\"3\">\n  </div>\n  <div id=\"spacing-label-input\" class=\"label-input-wrap\" title=\"Spacing between each circle\">\n    <label for=\"spacing-slider\">Spacing</label>\n    <input type=\"text\" size=\"6\" name=\"spacing-value\" tabindex=\"4\">\n  </div>\n\n  <div id=\"offset-label-input\" class=\"label-input-wrap\" title=\"Row to start from\">\n    <label for=\"offset-slider\">Offset</label>\n    <input type=\"text\" size=\"6\" name=\"offset-value\" tabindex=\"4\">\n  </div>\n\n  <input id=\"radius-slider\" type=\"range\">\n  <input id=\"spacing-slider\" type=\"range\">\n  <input id=\"offset-slider\" type=\"range\">\n\n</div>\n";
 },"useData":true});
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var HandlebarsCompiler = require(45);
 module.exports = HandlebarsCompiler.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div id='dropdown-links'>\n  <a id=\"save\" href=\"/download.html\" data-hook=\"download\">Save image</a>\n  <a id=\"permalink\" data-hook=\"perma\" href='/'>Permalink</a>\n</div>\n";
+    return "<div id='dropdown-links'>\n  <span>\n    Save &nbsp;\n    <a id=\"save-svg\" class=\"download\" href=\"/\" data-hook=\"download-svg\">SVG</a>\n    <a id=\"save-png\" class=\"download\" href=\"/\" data-hook=\"download-png\">PNG</a>\n  </span>\n  <a id=\"permalink\" data-hook=\"perma\" href='/'>Permalink</a>\n</div>\n";
 },"useData":true});
-},{}],8:[function(require,module,exports){
-var View = require(18);
+},{}],7:[function(require,module,exports){
+var View = require(17);
 var NProgress = require(255);
 
 //------------------------------------------------------------------------------
@@ -726,7 +700,7 @@ var InputView = View.extend({
 });
 
 var ControlsView = View.extend({
-  template: require(6),
+  template: require(5),
 
   autoRender: true,
   alreadyWarned: false,
@@ -891,26 +865,40 @@ var ControlsView = View.extend({
 
 
 module.exports = ControlsView;
-},{}],9:[function(require,module,exports){
-var View = require(18);
+},{}],8:[function(require,module,exports){
+var View = require(17);
+
+var FileSaver = require(25);
 
 //------------------------------------------------------------------------------
 
 var LinksView = View.extend({
-  template: require(7),
+  template: require(6),
 
   autoRender: true,
+  serializer: new XMLSerializer(),
+  iframe: undefined,
+
+  events: {
+    "click #save-png": "savePng",
+    "click #save-svg": "saveSvg"
+  },
 
   bindings: {
     "model.downloadDisabled": {
       type: 'booleanClass',
       name: 'disabled',
-      hook: "download"
+      selector: ".download"
     },
-    "model.downloadTitle": {
+    "model.downloadTitlePng": {
       type: 'attribute',
       name: 'title',
-      hook: 'download'
+      hook: 'download-png'
+    },
+    "model.downloadTitleSvg": {
+      type: 'attribute',
+      name: 'title',
+      hook: 'download-svg'
     },
     "model.url": {
       type: 'attribute',
@@ -918,12 +906,74 @@ var LinksView = View.extend({
       hook: 'perma'
     }
   },
+
+  savePng: function(e) {
+    e.preventDefault();
+
+    var stage, serialized, iframe, w;
+
+    if (this.model.controls.subject.digits < 5) {
+      stage = document.querySelector("#stage")
+      serialized = this.serializer.serializeToString(stage);
+
+      // For some reason Safari won't open a new tab with the image if the code
+      // is running inside an iframe, so this is a special case workaround.
+      //
+      // The reason for not using a web worker for this, is because both canvg
+      // and filesaver relies on DOM to do their magic.
+      //
+      // My oh my, what a slippery slope we have here.
+      var isSafari = navigator.userAgent.indexOf('Safari') != -1 &&
+        navigator.userAgent.indexOf('Chrome') == -1;
+
+      var downloadHost, msgTarget;
+      var that = this;
+
+      if (isSafari) {
+        w = window.open('download.html');
+
+        w.addEventListener('load', function() {
+          w.postMessage(serialized, document.location.origin);
+        });
+      } else {
+        if (!that.iframe) {
+          that.iframe = document.createElement('iframe');
+          that.iframe.src = 'download.html';
+
+          that.iframe.addEventListener('load', function() {
+            that.iframe.contentWindow.postMessage(serialized, document.location.origin);
+          });
+
+          document.querySelector('#iframe-wrap').appendChild(that.iframe);
+        } else {
+          that.iframe.contentWindow.postMessage(serialized, document.location.origin);
+        }
+      }
+    }
+  },
+
+  saveSvg: function(e) {
+    e.preventDefault();
+
+    var stage = document.querySelector("#stage")
+    var data = this.serializer.serializeToString(stage);
+
+    // Safari apparently doesn't understand the correct mimetype and just shows
+    // a blank page if used. Chrome, Firefox and IE all doesn't have a problem
+    // with plain text and understands filenames, so this is the workaround for
+    // the time being.
+
+    //var blob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+    var blob = new Blob([data], {type: "text/plain;charset=utf-8"});
+
+    FileSaver.saveAs(blob, 'winski.svg')
+  }
 });
 
 
 module.exports = LinksView;
-},{}],10:[function(require,module,exports){
-var View = require(18);
+},{}],9:[function(require,module,exports){
+var View = require(17);
 
 //------------------------------------------------------------------------------
 
@@ -1203,7 +1253,7 @@ var StageView = View.extend({
 });
 
 module.exports = StageView;
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var assign = require(200);
 
 /// Following code is largely pasted from Backbone.js
@@ -1251,7 +1301,7 @@ var extend = function(protoProps) {
 
 // Expose the extend function
 module.exports = extend;
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-collection-view"] = window.ampersand["ampersand-collection-view"] || [];  window.ampersand["ampersand-collection-view"].push("2.0.1");}
 var assign = require(200);
 var invokeMap = require(216);
@@ -1259,8 +1309,8 @@ var pick = require(240);
 var find = require(206);
 var difference = require(203);
 var bind = require(202);
-var Events = require(15);
-var ampExtend = require(11);
+var Events = require(14);
+var ampExtend = require(10);
 
 // options
 var options = ['collection', 'el', 'viewOptions', 'view', 'emptyView', 'filter', 'reverse', 'parent'];
@@ -1417,10 +1467,10 @@ assign(CollectionView.prototype, Events, {
 CollectionView.extend = ampExtend;
 
 module.exports = CollectionView;
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-dom-bindings"] = window.ampersand["ampersand-dom-bindings"] || [];  window.ampersand["ampersand-dom-bindings"].push("3.8.0");}
 var Store = require(46);
-var dom = require(14);
+var dom = require(13);
 var matchesSelector = require(254);
 var partial = require(50);
 var slice = Array.prototype.slice;
@@ -1682,7 +1732,7 @@ module.exports = function (bindings, context) {
 
     return store;
 };
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-dom"] = window.ampersand["ampersand-dom"] || [];  window.ampersand["ampersand-dom"].push("1.5.0");}
 var dom = module.exports = {
     text: function (el, val) {
@@ -1813,7 +1863,7 @@ function hide (el, mode) {
     dom.setAttribute(el, 'data-anddom-hidden', 'true');
     el.style[mode] = (mode === 'visibility' ? 'hidden' : 'none');
 }
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-events"] = window.ampersand["ampersand-events"] || [];  window.ampersand["ampersand-events"].push("2.0.2");}
 var runOnce = require(239);
 var keys = require(232);
@@ -1822,7 +1872,7 @@ var assign = require(200);
 var forEach = require(209);
 var slice = Array.prototype.slice;
 
-var utils = require(16);
+var utils = require(15);
 
 var Events = {
     // Bind an event to a `callback` function. Passing `"all"` will bind
@@ -1937,7 +1987,7 @@ Events.removeAllListeners = Events.off;
 Events.emit = Events.trigger;
 
 module.exports = Events;
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var uniqueId = require(251);
 var eventSplitter = /\s+/;
 
@@ -2004,7 +2054,7 @@ exports.createListenMethod = function createListenMethod(implementation) {
         return this;
     };
 };
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-state"] = window.ampersand["ampersand-state"] || [];  window.ampersand["ampersand-state"].push("5.0.2");}
 var uniqueId = require(251);
@@ -2023,9 +2073,9 @@ var has = require(212);
 var result = require(243);
 var bind = require(202); // because phantomjs doesn't have Function#bind
 var union = require(250);
-var Events = require(15);
+var Events = require(14);
 var KeyTree = require(46);
-var arrayNext = require(19);
+var arrayNext = require(18);
 var changeRE = /^change:/;
 var noop = function () {};
 
@@ -2864,11 +2914,11 @@ Base.extend = extend;
 
 // Our main exports
 module.exports = Base;
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-view"] = window.ampersand["ampersand-view"] || [];  window.ampersand["ampersand-view"].push("10.0.1");}
-var State = require(17);
-var CollectionView = require(12);
-var domify = require(24);
+var State = require(16);
+var CollectionView = require(11);
+var domify = require(23);
 var uniqueId = require(251);
 var pick = require(240);
 var assign = require(200);
@@ -2879,9 +2929,9 @@ var isString = require(229);
 var bind = require(202);
 var flatten = require(208);
 var invokeMap = require(216);
-var events = require(25);
+var events = require(24);
 var matches = require(254);
-var bindings = require(13);
+var bindings = require(12);
 var getPath = require(211);
 
 function View(attrs) {
@@ -3325,15 +3375,15 @@ View.prototype._setRender(View.prototype);
 View.prototype._setRemove(View.prototype);
 View.extend = BaseState.extend;
 module.exports = View;
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 module.exports = function arrayNext(array, currentItem) {
     var len = array.length;
     var newIndex = array.indexOf(currentItem) + 1;
     if (newIndex > (len - 1)) newIndex = 0;
     return array[newIndex];
 };
-},{}],20:[function(require,module,exports){
-var matches = require(21)
+},{}],19:[function(require,module,exports){
+var matches = require(20)
 
 module.exports = function (element, selector, checkYoSelf) {
   var parent = checkYoSelf ? element : element.parentNode
@@ -3343,7 +3393,7 @@ module.exports = function (element, selector, checkYoSelf) {
     parent = parent.parentNode
   }
 }
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var proto = Element.prototype;
 
 /**
@@ -3379,7 +3429,7 @@ function match(el, selector) {
   }
   return false;
 }
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
     unbind = window.removeEventListener ? 'removeEventListener' : 'detachEvent',
     prefix = bind !== 'addEventListener' ? 'on' : '';
@@ -3415,9 +3465,9 @@ exports.unbind = function(el, type, fn, capture){
   el[unbind](prefix + type, fn, capture || false);
   return fn;
 };
-},{}],23:[function(require,module,exports){
-var closest = require(20)
-  , event = require(22);
+},{}],22:[function(require,module,exports){
+var closest = require(19)
+  , event = require(21);
 
 /**
  * Delegate event `type` to `selector`
@@ -3462,7 +3512,7 @@ exports.unbind = function(el, type, fn, capture){
 
   event.unbind(el, type, fn, capture);
 };
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports = parse;
 
 /**
@@ -3570,9 +3620,9 @@ function parse(html, doc) {
 
   return fragment;
 }
-},{}],25:[function(require,module,exports){
-var events = require(22);
-var delegate = require(23);
+},{}],24:[function(require,module,exports){
+var events = require(21);
+var delegate = require(22);
 var forceCaptureEvents = ['focus', 'blur'];
 
 /**
@@ -3774,6 +3824,180 @@ function parse(event) {
     name: parts.shift(),
     selector: parts.join(' ')
   }
+}
+},{}],25:[function(require,module,exports){
+var saveAs = saveAs || (function(view) {
+	"use strict";
+	// IE <10 is explicitly unsupported
+	if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
+		return;
+	}
+	var
+		  doc = view.document
+		  // only get URL when necessary in case Blob.js hasn't overridden it yet
+		, get_URL = function() {
+			return view.URL || view.webkitURL || view;
+		}
+		, save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a")
+		, can_use_save_link = "download" in save_link
+		, click = function(node) {
+			var event = new MouseEvent("click");
+			node.dispatchEvent(event);
+		}
+		, is_safari = /constructor/i.test(view.HTMLElement)
+		, is_chrome_ios =/CriOS\/[\d]+/.test(navigator.userAgent)
+		, throw_outside = function(ex) {
+			(view.setImmediate || view.setTimeout)(function() {
+				throw ex;
+			}, 0);
+		}
+		, force_saveable_type = "application/octet-stream"
+		// the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
+		, arbitrary_revoke_timeout = 1000 * 40 // in ms
+		, revoke = function(file) {
+			var revoker = function() {
+				if (typeof file === "string") { // file is an object URL
+					get_URL().revokeObjectURL(file);
+				} else { // file is a File
+					file.remove();
+				}
+			};
+			setTimeout(revoker, arbitrary_revoke_timeout);
+		}
+		, dispatch = function(filesaver, event_types, event) {
+			event_types = [].concat(event_types);
+			var i = event_types.length;
+			while (i--) {
+				var listener = filesaver["on" + event_types[i]];
+				if (typeof listener === "function") {
+					try {
+						listener.call(filesaver, event || filesaver);
+					} catch (ex) {
+						throw_outside(ex);
+					}
+				}
+			}
+		}
+		, auto_bom = function(blob) {
+			// prepend BOM for UTF-8 XML and text/* types (including HTML)
+			// note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
+			if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
+				return new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
+			}
+			return blob;
+		}
+		, FileSaver = function(blob, name, no_auto_bom) {
+			if (!no_auto_bom) {
+				blob = auto_bom(blob);
+			}
+			// First try a.download, then web filesystem, then object URLs
+			var
+				  filesaver = this
+				, type = blob.type
+				, force = type === force_saveable_type
+				, object_url
+				, dispatch_all = function() {
+					dispatch(filesaver, "writestart progress write writeend".split(" "));
+				}
+				// on any filesys errors revert to saving with object URLs
+				, fs_error = function() {
+					if ((is_chrome_ios || (force && is_safari)) && view.FileReader) {
+						// Safari doesn't allow downloading of blob urls
+						var reader = new FileReader();
+						reader.onloadend = function() {
+							var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, 'data:attachment/file;');
+							var popup = view.open(url, '_blank');
+							if(!popup) view.location.href = url;
+							url=undefined; // release reference before dispatching
+							filesaver.readyState = filesaver.DONE;
+							dispatch_all();
+						};
+						reader.readAsDataURL(blob);
+						filesaver.readyState = filesaver.INIT;
+						return;
+					}
+					// don't create more object URLs than needed
+					if (!object_url) {
+						object_url = get_URL().createObjectURL(blob);
+					}
+					if (force) {
+						view.location.href = object_url;
+					} else {
+						var opened = view.open(object_url, "_blank");
+						if (!opened) {
+							// Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
+							view.location.href = object_url;
+						}
+					}
+					filesaver.readyState = filesaver.DONE;
+					dispatch_all();
+					revoke(object_url);
+				}
+			;
+			filesaver.readyState = filesaver.INIT;
+
+			if (can_use_save_link) {
+				object_url = get_URL().createObjectURL(blob);
+				setTimeout(function() {
+					save_link.href = object_url;
+					save_link.download = name;
+					click(save_link);
+					dispatch_all();
+					revoke(object_url);
+					filesaver.readyState = filesaver.DONE;
+				});
+				return;
+			}
+
+			fs_error();
+		}
+		, FS_proto = FileSaver.prototype
+		, saveAs = function(blob, name, no_auto_bom) {
+			return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
+		}
+	;
+	// IE 10+ (native saveAs)
+	if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
+		return function(blob, name, no_auto_bom) {
+			name = name || blob.name || "download";
+
+			if (!no_auto_bom) {
+				blob = auto_bom(blob);
+			}
+			return navigator.msSaveOrOpenBlob(blob, name);
+		};
+	}
+
+	FS_proto.abort = function(){};
+	FS_proto.readyState = FS_proto.INIT = 0;
+	FS_proto.WRITING = 1;
+	FS_proto.DONE = 2;
+
+	FS_proto.error =
+	FS_proto.onwritestart =
+	FS_proto.onprogress =
+	FS_proto.onwrite =
+	FS_proto.onabort =
+	FS_proto.onerror =
+	FS_proto.onwriteend =
+		null;
+
+	return saveAs;
+}(
+	   typeof self !== "undefined" && self
+	|| typeof window !== "undefined" && window
+	|| this.content
+));
+// `self` is undefined in Firefox for Android content script context
+// while `this` is nsIContentFrameMessageManager
+// with an attribute `content` that corresponds to the window
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports.saveAs = saveAs;
+} else if ((typeof define !== "undefined" && define !== null) && (define.amd !== null)) {
+  define([], function() {
+    return saveAs;
+  });
 }
 },{}],26:[function(require,module,exports){
 'use strict';
