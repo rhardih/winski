@@ -288,3 +288,9 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
   display: block;
   margin: 0 auto;
 }
+
+#iframe-wrap {
+  width: 0px;
+  height: 0px;
+  overflow: auto;
+}
