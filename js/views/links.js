@@ -44,7 +44,7 @@ var LinksView = View.extend({
 
     var stage, serialized, iframe, w;
 
-    if (this.model.controls.subject.digits < 5) {
+    if (!this.model.downloadDisabled) {
       stage = document.querySelector("#stage")
       serialized = this.serializer.serializeToString(stage);
 

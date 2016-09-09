@@ -12,9 +12,23 @@ var LinksState = State.extend({
 
   derived: {
     downloadDisabled: {
-      deps: ['subject.digits'],
+      deps: [
+        'shared.rows',
+        'shared.columns',
+        'stage.displayMode'
+      ],
       fn: function() {
-        return this.subject.digits > 4;
+        var tmp = this.shared.rows * this.shared.columns;
+
+        if (this.stage.displayMode == 0) {
+          tmp *= 1.3;
+        } else if (this.stage.displayMode == 1) {
+          tmp *= 1.6;
+        }
+
+        // This number is a heuristic for when the the size of the svg in a
+        // serialized form would become a blob that's too big to save.'
+        return tmp > 22000;
       }
     },
     downloadDisabledTitle: {
