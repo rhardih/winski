@@ -402,32 +402,34 @@ var LinksState = State.extend({
   },
 
   derived: {
-    downloadDisabled: {
-      deps: ['subject.digits'],
+    downloadDisabledPng: {
+      deps: [
+        'shared.rows',
+        'shared.columns',
+        'stage.displayMode'
+      ],
       fn: function() {
-        return this.subject.digits > 4;
-      }
-    },
-    downloadDisabledTitle: {
-      deps: ['downloadDisabled'],
-      fn: function() {
-        if (this.downloadDisabled) {
-          return "Image too big, download not possible"
-        } else {
-          return undefined;
+        var tmp = this.shared.rows * this.shared.columns;
+
+        if (this.stage.displayMode == 0) {
+          tmp *= 1.3;
+        } else if (this.stage.displayMode == 1) {
+          tmp *= 1.6;
         }
+
+        // This number is a lower bound approximation to ensure the serialized
+        // form of the inline svg isn't too big for canvg to save.
+        return tmp > 22000;
       }
     },
     downloadTitlePng: {
       deps: ['downloadDisabledTitle'],
       fn: function() {
-        return this.downloadDisabledTitle || "Download as PNG";
-      }
-    },
-    downloadTitleSvg: {
-      deps: ['downloadDisabledTitle'],
-      fn: function() {
-        return this.downloadDisabledTitle || "Download as SVG";
+        if (this.downloadDisabledSvg) {
+          return "Image too big, download not possible"
+        } else {
+          return "Download as PNG";
+        }
       }
     },
     url: {
@@ -656,7 +658,7 @@ module.exports = HandlebarsCompiler.template({"compiler":[7,">= 4.0.0"],"main":f
 },{}],6:[function(require,module,exports){
 var HandlebarsCompiler = require(45);
 module.exports = HandlebarsCompiler.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div id='dropdown-links'>\n  <span>\n    Save &nbsp;\n    <a id=\"save-svg\" class=\"download\" href=\"/\" data-hook=\"download-svg\">SVG</a>\n    <a id=\"save-png\" class=\"download\" href=\"/\" data-hook=\"download-png\">PNG</a>\n  </span>\n  <a id=\"permalink\" data-hook=\"perma\" href='/' title=\"Direct link to current configuration\">Permalink</a>\n</div>\n";
+    return "<div id='dropdown-links'>\n  <span>\n    Save &nbsp;\n    <a id=\"save-svg\" class=\"download\" href=\"/\" title=\"Download as SVG\">SVG</a>\n    <a id=\"save-png\" class=\"download\" href=\"/\" data-hook=\"download-png\">PNG</a>\n  </span>\n  <a id=\"permalink\" data-hook=\"perma\" href='/' title=\"Direct link to current configuration\">Permalink</a>\n</div>\n";
 },"useData":true});
 },{}],7:[function(require,module,exports){
 var View = require(17);
@@ -867,8 +869,8 @@ var ControlsView = View.extend({
 module.exports = ControlsView;
 },{}],8:[function(require,module,exports){
 var View = require(17);
-
 var FileSaver = require(25);
+var NProgress = require(255);
 
 //------------------------------------------------------------------------------
 
@@ -879,26 +881,29 @@ var LinksView = View.extend({
   serializer: new XMLSerializer(),
   iframe: undefined,
 
+  initialize: function() {
+    window.addEventListener('message', function(e) {
+      if (e.data === 'png-done') {
+        NProgress.done();
+      }
+    });
+  },
+
   events: {
     "click #save-png": "savePng",
     "click #save-svg": "saveSvg"
   },
 
   bindings: {
-    "model.downloadDisabled": {
+    "model.downloadDisabledPng": {
       type: 'booleanClass',
       name: 'disabled',
-      selector: ".download"
+      hook: 'download-png'
     },
     "model.downloadTitlePng": {
       type: 'attribute',
       name: 'title',
       hook: 'download-png'
-    },
-    "model.downloadTitleSvg": {
-      type: 'attribute',
-      name: 'title',
-      hook: 'download-svg'
     },
     "model.url": {
       type: 'attribute',
@@ -912,7 +917,9 @@ var LinksView = View.extend({
 
     var stage, serialized, iframe, w;
 
-    if (this.model.controls.subject.digits < 5) {
+    if (!this.model.downloadDisabledPng) {
+      NProgress.start();
+
       stage = document.querySelector("#stage")
       serialized = this.serializer.serializeToString(stage);
 
