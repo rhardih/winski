@@ -166,7 +166,7 @@ var ControlsView = View.extend({
   selectSubject: function(e) {
     e.preventDefault();
 
-    switch (this, e.target.hash) {
+    switch (e.target.hash) {
       case '#phi':
         this.model.subject.setPhi();
         break;

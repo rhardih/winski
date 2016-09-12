@@ -23,13 +23,14 @@ if (paramsStr.length > 0) {
   });
 }
 
-var ROWS = params.ro || 50;
-var COLUMNS = params.co || 20;
-var RADIUS = params.ra || 7;
-var SPACING = params.sp || 25;
-var OFFSET = params.of || 0;
-var DISPLAYMODE = params.dm || 0;
-var DIGITS = params.di || 3;
+var ROWS = 'ro' in params ? params.ro : 50;
+var COLUMNS = 'co' in params ? params.co : 20;
+var RADIUS = 'ra' in params ? params.ra : 7;
+var SPACING = 'sp' in params ? params.sp : 25;
+var OFFSET = 'of' in params ? params.of : 0;
+var DISPLAYMODE = 'dm' in params ? params.dm : 0;
+var DIGITS = 'di' in params ? params.di : 3;
+var SUBJECT = 'su' in params ? params.su : 1;
 
 //------------------------------------------------------------------------------
 
@@ -233,6 +234,17 @@ var SharedState = State.extend({
 var sharedState = new SharedState();
 var subjectState = new SubjectState();
 
+switch (SUBJECT) {
+  case 0:
+    subjectState.setPhi();
+    break;
+  case 2:
+    subjectState.setE();
+    break;
+  default:
+    subjectState.setPi();
+}
+
 var load = function() {
   var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
@@ -336,7 +348,7 @@ var load = function() {
 }
 
 if (DIGITS > 3) {
-  subjectState.on('done', function() {
+  subjectState.once('done', function() {
     ready(load);
   });
   subjectState.digits = DIGITS;
