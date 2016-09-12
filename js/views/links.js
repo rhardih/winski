@@ -25,20 +25,15 @@ var LinksView = View.extend({
   },
 
   bindings: {
-    "model.downloadDisabled": {
+    "model.downloadDisabledPng": {
       type: 'booleanClass',
       name: 'disabled',
-      selector: ".download"
+      hook: 'download-png'
     },
     "model.downloadTitlePng": {
       type: 'attribute',
       name: 'title',
       hook: 'download-png'
-    },
-    "model.downloadTitleSvg": {
-      type: 'attribute',
-      name: 'title',
-      hook: 'download-svg'
     },
     "model.url": {
       type: 'attribute',
@@ -52,7 +47,7 @@ var LinksView = View.extend({
 
     var stage, serialized, iframe, w;
 
-    if (!this.model.downloadDisabled) {
+    if (!this.model.downloadDisabledPng) {
       NProgress.start();
 
       stage = document.querySelector("#stage")

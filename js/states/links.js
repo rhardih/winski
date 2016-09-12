@@ -11,7 +11,7 @@ var LinksState = State.extend({
   },
 
   derived: {
-    downloadDisabled: {
+    downloadDisabledPng: {
       deps: [
         'shared.rows',
         'shared.columns',
@@ -26,31 +26,19 @@ var LinksState = State.extend({
           tmp *= 1.6;
         }
 
-        // This number is a heuristic for when the the size of the svg in a
-        // serialized form would become a blob that's too big to save.'
+        // This number is a lower bound approximation to ensure the serialized
+        // form of the inline svg isn't too big for canvg to save.
         return tmp > 22000;
-      }
-    },
-    downloadDisabledTitle: {
-      deps: ['downloadDisabled'],
-      fn: function() {
-        if (this.downloadDisabled) {
-          return "Image too big, download not possible"
-        } else {
-          return undefined;
-        }
       }
     },
     downloadTitlePng: {
       deps: ['downloadDisabledTitle'],
       fn: function() {
-        return this.downloadDisabledTitle || "Download as PNG";
-      }
-    },
-    downloadTitleSvg: {
-      deps: ['downloadDisabledTitle'],
-      fn: function() {
-        return this.downloadDisabledTitle || "Download as SVG";
+        if (this.downloadDisabledSvg) {
+          return "Image too big, download not possible"
+        } else {
+          return "Download as PNG";
+        }
       }
     },
     url: {
