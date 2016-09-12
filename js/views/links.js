@@ -1,6 +1,6 @@
 var View = require('ampersand-view');
-
 var FileSaver = require('file-saver');
+var NProgress = require('nprogress');
 
 //------------------------------------------------------------------------------
 
@@ -11,26 +11,29 @@ var LinksView = View.extend({
   serializer: new XMLSerializer(),
   iframe: undefined,
 
+  initialize: function() {
+    window.addEventListener('message', function(e) {
+      if (e.data === 'png-done') {
+        NProgress.done();
+      }
+    });
+  },
+
   events: {
     "click #save-png": "savePng",
     "click #save-svg": "saveSvg"
   },
 
   bindings: {
-    "model.downloadDisabled": {
+    "model.downloadDisabledPng": {
       type: 'booleanClass',
       name: 'disabled',
-      selector: ".download"
+      hook: 'download-png'
     },
     "model.downloadTitlePng": {
       type: 'attribute',
       name: 'title',
       hook: 'download-png'
-    },
-    "model.downloadTitleSvg": {
-      type: 'attribute',
-      name: 'title',
-      hook: 'download-svg'
     },
     "model.url": {
       type: 'attribute',
@@ -44,7 +47,9 @@ var LinksView = View.extend({
 
     var stage, serialized, iframe, w;
 
-    if (this.model.controls.subject.digits < 5) {
+    if (!this.model.downloadDisabledPng) {
+      NProgress.start();
+
       stage = document.querySelector("#stage")
       serialized = this.serializer.serializeToString(stage);
 
