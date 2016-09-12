@@ -1,4 +1,5 @@
 var State = require('ampersand-state');
+var Numbers = require('../numbers.js');
 
 //------------------------------------------------------------------------------
 
@@ -46,6 +47,7 @@ var LinksState = State.extend({
         'shared.rows',
         'shared.columns',
         'subject.digits',
+        'subject.name',
         'shared.radius',
         'shared.spacing',
         'shared.offset',
@@ -60,6 +62,17 @@ var LinksState = State.extend({
           sp: this.shared.spacing,
           of: this.shared.offset,
           dm: this.stage.displayMode
+        }
+
+        switch (this.subject.name) {
+          case Numbers.PHI:
+            tmp.su = 0;
+            break;
+          case Numbers.E:
+            tmp.su = 2;
+            break;
+          default:
+            tmp.su = 1;
         }
 
         var params = Object.keys(tmp).map(function(key){

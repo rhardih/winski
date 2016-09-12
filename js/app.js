@@ -30,6 +30,7 @@ var SPACING = 'sp' in params ? params.sp : 25;
 var OFFSET = 'of' in params ? params.of : 0;
 var DISPLAYMODE = 'dm' in params ? params.dm : 0;
 var DIGITS = 'di' in params ? params.di : 3;
+var SUBJECT = 'su' in params ? params.su : 1;
 
 //------------------------------------------------------------------------------
 
@@ -333,6 +334,17 @@ var load = function() {
   subjectState.on('change:value', function() {
     stageView.render();
   });
+
+  switch (SUBJECT) {
+    case 0:
+      subjectState.setPhi();
+      break;
+    case 2:
+      subjectState.setE();
+      break;
+    default:
+      subjectState.setPi();
+  }
 }
 
 if (DIGITS > 3) {
