@@ -54,6 +54,16 @@
   flex-grow: $v;
 }
 
+@mixin transition($args...) {
+  -webkit-transition: $args;
+  transition: $args;
+}
+
+@mixin transition-delay($duration) {
+  -webkit-transition-delay: $duration;
+  transition-delay: $duration;
+}
+
 // Colors
 
 $black: #000;
@@ -64,7 +74,7 @@ $aqua-forest: #6a6;
 // Globals
 
 $border-radius: 5px;
-$animation-duration: 150ms;
+$animation-duration: 200ms;
 
 // Imports
 
@@ -142,9 +152,11 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
 }
 
 #dropdown-drawer {
+  @include transition(max-height $animation-duration ease-out);
+
   max-height: 0;
-  transition: max-height $animation-duration ease-out;
   overflow: hidden;
+
 }
 
 #dropdown-check {
@@ -159,6 +171,9 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
   }
 
   &:checked ~ #dropdown-toggle #dropdown-links {
+    @include transition-delay(0s);
+
+    visibility: visible;
     opacity: 1;
   }
 }
@@ -169,10 +184,14 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
   #dropdown-links {
     @include flex-display;
     @include flex-justify(space-around);
+    @include transition(
+      visibility 0s ease-out $animation-duration,
+      opacity $animation-duration ease-out
+    );
 
-    transition: opacity $animation-duration ease-out;
     margin: 1rem;
     opacity: 0;
+    visibility: hidden;
     position: absolute;
     line-height: 2rem;
     width: 40%;
@@ -250,8 +269,7 @@ $colors: #ED2079 #ED3E36 #F76321 #FFB73B #F5EC2B #8DC53A #37B347 #00ABEE #283891
       border: 0;
       border-radius: 3px;
 
-      -webkit-transition: 0.1s ease-out;
-      transition: 0.1s ease-out;
+      @include transition(0.1s ease-out);
     }
 
   }
