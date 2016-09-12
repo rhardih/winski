@@ -1,6 +1,6 @@
 var View = require('ampersand-view');
-
 var FileSaver = require('file-saver');
+var NProgress = require('nprogress');
 
 //------------------------------------------------------------------------------
 
@@ -10,6 +10,14 @@ var LinksView = View.extend({
   autoRender: true,
   serializer: new XMLSerializer(),
   iframe: undefined,
+
+  initialize: function() {
+    window.addEventListener('message', function(e) {
+      if (e.data === 'png-done') {
+        NProgress.done();
+      }
+    });
+  },
 
   events: {
     "click #save-png": "savePng",
@@ -45,6 +53,8 @@ var LinksView = View.extend({
     var stage, serialized, iframe, w;
 
     if (!this.model.downloadDisabled) {
+      NProgress.start();
+
       stage = document.querySelector("#stage")
       serialized = this.serializer.serializeToString(stage);
 
