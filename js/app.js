@@ -234,6 +234,17 @@ var SharedState = State.extend({
 var sharedState = new SharedState();
 var subjectState = new SubjectState();
 
+switch (SUBJECT) {
+  case 0:
+    subjectState.setPhi();
+    break;
+  case 2:
+    subjectState.setE();
+    break;
+  default:
+    subjectState.setPi();
+}
+
 var load = function() {
   var svgEl = document.querySelector('svg');
   var controlsEl = document.querySelector('#dropdown-controls');
@@ -334,21 +345,10 @@ var load = function() {
   subjectState.on('change:value', function() {
     stageView.render();
   });
-
-  switch (SUBJECT) {
-    case 0:
-      subjectState.setPhi();
-      break;
-    case 2:
-      subjectState.setE();
-      break;
-    default:
-      subjectState.setPi();
-  }
 }
 
 if (DIGITS > 3) {
-  subjectState.on('done', function() {
+  subjectState.once('done', function() {
     ready(load);
   });
   subjectState.digits = DIGITS;
