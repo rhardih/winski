@@ -684,7 +684,7 @@ module.exports = HandlebarsCompiler.template({"compiler":[7,">= 4.0.0"],"main":f
 },{}],7:[function(require,module,exports){
 var HandlebarsCompiler = require(46);
 module.exports = HandlebarsCompiler.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div id='dropdown-links'>\n  <span>\n    Save &nbsp;\n    <a id=\"save-svg\" class=\"download\" href=\"/\" title=\"Download as SVG\">SVG</a>\n    <a id=\"save-png\" class=\"download\" href=\"/\" data-hook=\"download-png\">PNG</a>\n  </span>\n  <a id=\"permalink\" data-hook=\"perma\" href='/' title=\"Direct link to current configuration\">Permalink</a>\n</div>\n";
+    return "<div id='dropdown-links'>\n  <span>\n    Save &nbsp;\n    <a id=\"save-svg\" href=\"/\" title=\"Download as SVG\">SVG</a>\n    <a id=\"save-png\" href=\"/\" data-hook=\"download-png\">PNG</a>\n  </span>\n  <a id=\"permalink\" data-hook=\"perma\" href='/' title=\"Direct link to current configuration\">Permalink</a>\n</div>\n";
 },"useData":true});
 },{}],8:[function(require,module,exports){
 var View = require(18);
@@ -941,46 +941,45 @@ var LinksView = View.extend({
   savePng: function(e) {
     e.preventDefault();
 
-    var stage, serialized, iframe, w;
+    if (this.model.downloadDisabledPng) { return; }
 
-    if (!this.model.downloadDisabledPng) {
-      NProgress.start();
+    var stage, serialized, isSafari, that, iframe, w;
 
-      stage = document.querySelector("#stage")
-      serialized = this.serializer.serializeToString(stage);
+    NProgress.start();
 
-      // For some reason Safari won't open a new tab with the image if the code
-      // is running inside an iframe, so this is a special case workaround.
-      //
-      // The reason for not using a web worker for this, is because both canvg
-      // and filesaver relies on DOM to do their magic.
-      //
-      // My oh my, what a slippery slope we have here.
-      var isSafari = navigator.userAgent.indexOf('Safari') != -1 &&
-        navigator.userAgent.indexOf('Chrome') == -1;
+    stage = document.querySelector("#stage")
+    serialized = this.serializer.serializeToString(stage);
 
-      var downloadHost, msgTarget;
-      var that = this;
+    // For some reason Safari won't open a new tab with the image if the code
+    // is running inside an iframe, so this is a special case workaround.
+    //
+    // The reason for not using a web worker for this, is because both canvg
+    // and filesaver relies on DOM to do their magic.
+    //
+    // My oh my, what a slippery slope we have here.
+    isSafari = navigator.userAgent.indexOf('Safari') != -1 &&
+      navigator.userAgent.indexOf('Chrome') == -1;
 
-      if (isSafari) {
-        w = window.open('download.html');
+    that = this;
 
-        w.addEventListener('load', function() {
-          w.postMessage(serialized, document.location.origin);
-        });
-      } else {
-        if (!that.iframe) {
-          that.iframe = document.createElement('iframe');
-          that.iframe.src = 'download.html';
+    if (isSafari) {
+      w = window.open('download.html');
 
-          that.iframe.addEventListener('load', function() {
-            that.iframe.contentWindow.postMessage(serialized, document.location.origin);
-          });
+      w.addEventListener('load', function() {
+        w.postMessage(serialized, document.location.origin);
+      });
+    } else {
+      if (!that.iframe) {
+        that.iframe = document.createElement('iframe');
+        that.iframe.src = 'download.html';
 
-          document.querySelector('#iframe-wrap').appendChild(that.iframe);
-        } else {
+        that.iframe.addEventListener('load', function() {
           that.iframe.contentWindow.postMessage(serialized, document.location.origin);
-        }
+        });
+
+        document.querySelector('#iframe-wrap').appendChild(that.iframe);
+      } else {
+        that.iframe.contentWindow.postMessage(serialized, document.location.origin);
       }
     }
   },
